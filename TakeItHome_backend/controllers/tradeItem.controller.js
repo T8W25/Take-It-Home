@@ -1,68 +1,87 @@
-import Item from "../models/tradeItem.model.js";
-import mongoose from "mongoose";
+const TradeItem = require("../models/tradeItem.model.js");
 
-//get all items
-export const getTradeItems = async (req, res) => {
+//  GET ALL TRADE ITEMS
+const getTradeItems = async (req, res) => {
     try {
-        const items = await Item.find();
-        res.status(200).json({ success: true, data: items });
+        const tradeItems = await TradeItem.find();
+        res.status(200).json(tradeItems);
     } catch (error) {
-        console.error("Error in fetching items:", error.message);
-        res.status(500).json({ success: false, message: "Server Error" });
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
-
-//create an item
-export const createTradeItems = async (req, res) => {
-    const item = req.body; //user will send this data
- 
-    if (!item.name || !item.description || !item.category || !item.condition || !item.image) {
-        return res.status(400).json({ success: false, message: "Please enter all fields" });
-    }
- 
-    const newItem = new Item(item);
- 
-    try{
-     await newItem.save();
-     res.status(201).json({ success: true, data: newItem,  message: "Item added successfully" });
-    }
-    catch (error) {
-     console.error("Error in create item:", error.message);
-     res.status(500).json({ success: false, message: "Server Error" });
-    }
- };
-
-
- //update an item
- export const updateTradeItem = async (req, res) => {
-    const { id } = req.params;
-    const item = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ success: false, message: "Invalid Id" });
-    }
-
+//  CREATE A NEW TRADE ITEM
+const createTradeItems = async (req, res) => {
     try {
-        const updatedItem = await Item.findByIdAndUpdate(id, item, { new: true });
-        res.status(200).json({ success: true, data: updatedItem, message: "Item updated successfully" });
+        const { userId, userType, title, description, category, condition } = req.body;
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+        const newTradeItem = new TradeItem({
+            userId,
+            userType,
+            title,
+            description,
+            imageUrl,
+            category,
+            condition,
+            status: "available"
+        });
+
+        await newTradeItem.save();
+        res.status(201).json({ message: "Trade item created successfully", tradeItem: newTradeItem });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server Error, Item not found" });
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
-//delete an item
-export const deleteTradeItem = async (req, res) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ success: false, message: "Invalid Id" });
-    }
-    
+//  UPDATE A TRADE ITEM
+const updateTradeItem = async (req, res) => {
     try {
-        await Item.findByIdAndDelete(id);
-        res.status(200).json({ success: true, message: "Item deleted successfully" });
+        const { id } = req.params;
+        const { title, description, category, condition } = req.body;
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+        const tradeItem = await TradeItem.findById(id);
+        if (!tradeItem) return res.status(404).json({ message: "Trade item not found" });
+
+        tradeItem.title = title || tradeItem.title;
+        tradeItem.description = description || tradeItem.description;
+        tradeItem.category = category || tradeItem.category;
+        tradeItem.condition = condition || tradeItem.condition;
+        tradeItem.imageUrl = imageUrl || tradeItem.imageUrl;
+        tradeItem.updatedAt = Date.now();
+
+        await tradeItem.save();
+        res.status(200).json({ message: "Trade item updated successfully", tradeItem });
+
     } catch (error) {
-        console.error("Error in delete item:", error.message);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(500).json({ message: "Server error", error: error.message });
     }
+};
+
+//  DELETE A TRADE ITEM (Soft Delete)
+const deleteTradeItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const tradeItem = await TradeItem.findById(id);
+        if (!tradeItem) return res.status(404).json({ message: "Trade item not found" });
+
+        tradeItem.status = "deleted";
+        await tradeItem.save();
+
+        res.status(200).json({ message: "Trade item marked as deleted", tradeItem });
+
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+// EXPORT ALL FUNCTIONS
+module.exports = {
+    getTradeItems,
+    createTradeItems,
+    updateTradeItem,
+    deleteTradeItem,
 };

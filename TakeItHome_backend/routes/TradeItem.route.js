@@ -1,18 +1,18 @@
-import express from "express";
-import { getTradeItems, createTradeItems, updateTradeItem, deleteTradeItem } from "../controllers/tradeItem.controller.js";
-
+const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/uploadMiddleware.js");
+const { getTradeItems, createTradeItems, updateTradeItem, deleteTradeItem } = require("../controllers/tradeItem.controller.js");
 
-//GET ALL ITEMS
+//  GET ALL TRADE ITEMS
 router.get("/", getTradeItems);
 
-//POST ITEM
-router.post("/", createTradeItems);
+//  CREATE A NEW TRADE ITEM
+router.post("/", upload.single("image"), createTradeItems);
 
-//Update or put item
-router.put("/:id", updateTradeItem);
+//  UPDATE A TRADE ITEM
+router.put("/:id", upload.single("image"), updateTradeItem);
 
-//DELETE ITEM
-router.delete("/:id", deleteTradeItem);  
+//  DELETE A TRADE ITEM
+router.delete("/:id", deleteTradeItem);
 
-export default router;
+module.exports = router;
