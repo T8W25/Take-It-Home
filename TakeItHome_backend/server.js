@@ -1,26 +1,62 @@
+const path = require("path"); // Import path first
+require("dotenv").config({ path: path.resolve(__dirname, ".env") }); // Now use path
+
 const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
 const mongoose = require("mongoose");
-const path = require("path");
+const cors = require("cors");
 
-const tradeItemRoutes = require("./routes/TradeItem.route.js");
+const authRoutes = require("./routes/auth.route.js");
 
-dotenv.config();
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// Debugging: Print MONGO_URI to check if it's loaded
+console.log("DEBUG: MONGO_URI =", process.env.MONGO_URI);
+
+if (!process.env.MONGO_URI) {
+  console.error("ERROR: MONGO_URI is not defined in .env");
+  process.exit(1);
+}
+
+// CORS Middleware (Allow frontend requests)
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization"
+}));
+
+// Middleware
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-//  Load Trade Item Routes
-app.use("/api/trade-items", tradeItemRoutes);
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => {
+    console.error("MongoDB Connection Error:", err.message);
+    process.exit(1);
+  });
 
-//  Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+// Load Routes
+app.use("/api/auth", authRoutes);
 
-//  Start Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Default API Route
+app.get("/", (req, res) => {
+  res.send("TakeItHome API is running...");
+});
+
+// Start Server
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Promise Rejection:", err.message);
+  server.close(() => process.exit(1));
+});
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM Received. Closing server...");
+  server.close(() => console.log("Server Closed."));
+});
