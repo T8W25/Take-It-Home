@@ -4,14 +4,15 @@ import { Form, Button, Container, Row, Col, Alert, Spinner } from "react-bootstr
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null); // Success/Error messages
+  const [loading, setLoading] = useState(false); // Loading state
 
-  const API_URL = "http://localhost:3000/api/auth/login"; // Ensure this is correct
+  const API_URL = "http://localhost:3000/api/auth/login"; // Adjust this if needed
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // Check for empty fields
     if (!email || !password) {
       setMessage({ type: "danger", text: "All fields are required" });
       return;
@@ -23,9 +24,7 @@ function Login() {
     try {
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -37,14 +36,14 @@ function Login() {
 
       setMessage({ type: "success", text: "Login successful!" });
 
-      // Store token in localStorage (for future authenticated requests)
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Store token in local storage
+      localStorage.setItem("token", data.token);
 
-      window.location.href = "/dashboard"; // Redirect after login
+      // Redirect or update UI
+      console.log("User logged in:", data.user);
     } catch (error) {
       console.error("Login error:", error);
-      setMessage({ type: "danger", text: error.message || "Server error. Please try again later." });
+      setMessage({ type: "danger", text: error.message || "Server error. Try again." });
     }
 
     setLoading(false);
