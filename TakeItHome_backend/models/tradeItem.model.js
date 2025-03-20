@@ -1,16 +1,12 @@
 const mongoose = require("mongoose");
 
-const TradeItemSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    userType: { type: String, enum: ["trader", "donor"], required: true },
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    imageUrl: { type: String },
-    category: { type: String },
-    condition: { type: String, enum: ["new", "used"], required: true },
-    status: { type: String, enum: ["available", "traded", "deleted"], default: "available" },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date },
-});
+const tradeItemSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  itemName: { type: String, required: true },
+  category: { type: String, required: true },
+  condition: { type: String, required: true },
+  description: { type: String, required: true },
+  imageUrl: { type: String },
+}, { timestamps: true });
 
-module.exports = mongoose.model("TradeItem", TradeItemSchema);
+module.exports = mongoose.model("TradeItem", tradeItemSchema);
