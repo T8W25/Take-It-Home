@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
+
 // Signup Function (Encrypt Password)
 exports.signup = async (req, res) => {
   try {
@@ -77,5 +78,16 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+// Logout function (invalidate token)
+exports.logout = async (req, res) => {
+  try {
+      // Invalidate token by making it expire immediately
+      res.status(200).json({
+          message: "Logout successful!"
+      });
+  } catch (error) {
+      res.status(500).json({ message: "Server error during logout", error: error.message });
   }
 };
