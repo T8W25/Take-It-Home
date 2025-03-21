@@ -1,11 +1,13 @@
 const express = require("express");
-const { signup, login, logout } = require("../controllers/auth.controller");  // Ensure controller is imported
-
+const { signup, login, logout } = require("../controllers/auth.controller");
 const router = express.Router();
 
-// Define Routes Correctly
-router.post("/signup", signup);  //  Make sure signup function exists
-router.post("/login", login);  //  Make sure login function exists
-router.post("/logout", logout);  //  Make sure logout function exists
+// Signup Route
+router.post("/signup", signup);
+
+// Login Route
+router.post("/login", login);
+
+router.post("/logout", logout);
 
 module.exports = router;
