@@ -7,7 +7,8 @@ import Explore from './pages/Explore';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import PostItem from './pages/Postitem';  // ✅ Import PostItem page
+import PostItem from './pages/Postitem';  // ✅ Import PostItem page (for trading)
+import PostItemDonation from './pages/PostItemDonation';  // Import PostItemDonation page (for donation)
 import './App.css';
 
 function App() {
@@ -20,7 +21,8 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/post-item" element={<PostItem />} /> {/* ✅ New route */}
+        <Route path="/post-item" element={<PostItem />} /> {/* For Trading */}
+        <Route path="/donate-item" element={<PostItemDonation />} /> {/* New route for Donation */}
       </Routes>
     </>
   );
