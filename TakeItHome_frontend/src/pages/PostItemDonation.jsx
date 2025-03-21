@@ -1,43 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 
-function PostItem() {
+function PostItemDonation() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
-  const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
-  const [items, setItems] = useState([]); // ✅ Stores posted items
+  const [donations, setDonations] = useState([]);  // ✅ Used properly
 
-  const API_BASE = "http://localhost:3000/api/trade-items";
+  const API_BASE = "http://localhost:3000/api/donation-items";
 
-  // ✅ Fetch items when the page loads
   useEffect(() => {
-    fetchItems();
+    fetchDonations();
   }, []);
 
-  // ✅ Function to Fetch Items
-  const fetchItems = async () => {
+  const fetchDonations = async () => {
     try {
-      const res = await fetch(`${API_BASE}/all`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch items");
-      }
+      const res = await fetch(`${API_BASE}`);
       const data = await res.json();
-      setItems(data); // ✅ Store fetched items
+      setDonations(data);  // ✅ Correctly set state
     } catch (err) {
-      console.error("❌ Fetch error:", err);
+      console.error("Fetch error:", err);
     }
   };
 
-  // ✅ Handle Submit Function
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title || !category || !condition || !description || (!image && !video)) {
-      setMessage({ type: "danger", text: "All fields are required, including at least one media file." });
+    if (!title || !category || !condition || !description || !image) {
+      setMessage({ type: "danger", text: "All fields are required" });
       return;
     }
 
@@ -46,39 +38,28 @@ function PostItem() {
     formData.append("category", category);
     formData.append("condition", condition);
     formData.append("description", description);
-    if (image) formData.append("image", image);
-    if (video) formData.append("video", video);
+    formData.append("image", image);
 
     try {
-      const res = await fetch(`${API_BASE}/post`, {
+      const res = await fetch(`${API_BASE}`, {
         method: "POST",
         body: formData,
       });
 
-      // ✅ LOG THE RAW RESPONSE
-      const text = await res.text();
-      console.log("RAW RESPONSE:", text);
-      
-      const result = JSON.parse(text);
+      const result = await res.json();
       if (!res.ok) {
-        throw new Error(result.message || "Failed to post item");
+        throw new Error(result.message || "Error posting item");
       }
 
-      console.log("✅ Item Posted:", result);
-      setMessage({ type: "success", text: "Item posted successfully!" });
-
-      // ✅ Clear Form
+      setMessage({ type: "success", text: "Item posted successfully" });
       setTitle("");
       setCategory("");
       setCondition("");
       setDescription("");
       setImage(null);
-      setVideo(null);
-
-      // ✅ Fetch updated items
-      fetchItems();
+      fetchDonations();  // ✅ Refresh donation list after posting
     } catch (err) {
-      console.error("❌ Post error:", err);
+      console.error("Post error:", err);
       setMessage({ type: "danger", text: err.message });
     }
   };
@@ -87,14 +68,19 @@ function PostItem() {
     <Container>
       <Row className="justify-content-md-center mt-5">
         <Col xs={12} md={6}>
-          <h2 className="text-center mb-4">Post a Trade Item</h2>
+          <h2 className="text-center mb-4">Post a Donation Item</h2>
 
           {message && <Alert variant={message.type}>{message.text}</Alert>}
 
           <Form onSubmit={handleSubmit} encType="multipart/form-data">
             <Form.Group className="mb-3">
               <Form.Label>Item Name</Form.Label>
-              <Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter item name" />
+              <Form.Control
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter item name"
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -119,39 +105,50 @@ function PostItem() {
 
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter item description" />
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter item description"
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Upload Image</Form.Label>
-              <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+              <Form.Control
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Upload Video (Optional)</Form.Label>
-              <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
-            </Form.Group>
-
-            <Button type="submit" variant="primary" className="w-100">Post Item</Button>
+            <Button type="submit" variant="primary" className="w-100">
+              Post Item
+            </Button>
           </Form>
         </Col>
       </Row>
 
       <hr className="my-5" />
-      <h3 className="text-center">Posted Items</h3>
+      <h3 className="text-center">Posted Donations</h3>
       <Row>
-        {items.map((item) => (
-          <Col md={4} key={item._id} className="mb-4">
+        {donations.map((donation) => (
+          <Col md={4} key={donation._id} className="mb-4">
             <Card>
-              {item.imageUrl && (
-                <Card.Img variant="top" src={`http://localhost:3000${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
+              {donation.imageUrl && (
+                <Card.Img
+                  variant="top"
+                  src={`http://localhost:3000${donation.imageUrl}`}
+                  style={{ maxHeight: "200px", objectFit: "cover" }}
+                />
               )}
               <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
+                <Card.Title>{donation.title}</Card.Title>
+                <Card.Text>{donation.description}</Card.Text>
                 <Card.Text>
-                  <strong>Category:</strong> {item.category} <br />
-                  <strong>Condition:</strong> {item.condition}
+                  <strong>Category:</strong> {donation.category} <br />
+                  <strong>Condition:</strong> {donation.condition}
                 </Card.Text>
               </Card.Body>
             </Card>
@@ -162,4 +159,4 @@ function PostItem() {
   );
 }
 
-export default PostItem;
+export default PostItemDonation;

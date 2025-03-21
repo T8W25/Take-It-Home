@@ -37,6 +37,7 @@ const NavBar = () => {
           <Nav.Link href="/explore">Explore</Nav.Link>
           <Nav.Link href="/contact">Contact</Nav.Link>
           {isLoggedIn && <Nav.Link href="/post-item">Post Item</Nav.Link>}
+          {isLoggedIn && <Nav.Link href="/donate-item">Donation </Nav.Link>}
         </Nav>
 
         <Nav className="ms-auto">

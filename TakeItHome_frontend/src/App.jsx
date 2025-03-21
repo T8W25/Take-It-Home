@@ -8,7 +8,9 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PostItem from './pages/Postitem';
+import DonateItem from './pages/PostitemDonation';
 import './App.css';
+import PostItemDonation from './pages/PostitemDonation';
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/post-item" element={<PostItem />} />
+        <Route path="/donate-item" element={<PostItemDonation />} />
 
       </Routes>
     </>
