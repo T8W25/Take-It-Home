@@ -6,13 +6,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer"); // For file uploads
 
-const authRoutes = require("./routes/auth.route.js"); 
+const authRoutes = require("./routes/auth.route.js");
 const tradeItemRoutes = require("./routes/TradeItem.route.js"); // Ensure this file exists
 
-const app = express(); // ✅ Define `app` before using it
+const app = express(); // Define `app` before using it
 const PORT = process.env.PORT || 3000;
 
-// Debugging MongoDB connection
+// Debugging: Print MONGO_URI to check if it's loaded
 console.log("DEBUG: MONGO_URI =", process.env.MONGO_URI);
 if (!process.env.MONGO_URI) {
   console.error("ERROR: MONGO_URI is not defined in .env");
@@ -20,29 +20,33 @@ if (!process.env.MONGO_URI) {
 }
 
 // CORS Middleware
-app.use(cors({
-  origin: "http://localhost:5173",
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type,Authorization"
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
 
 // Middleware
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log("✅ MongoDB Connected"))
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => {
     console.error("MongoDB Connection Error:", err.message);
     process.exit(1);
   });
 
-// Load Routes
+// Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/trade-items", tradeItemRoutes); // ✅ This is now placed correctly
+app.use("/api/trade-items", tradeItemRoutes); // ✅ Fixed the route mounting
 
 // Default API Route
 app.get("/", (req, res) => {
@@ -50,13 +54,17 @@ app.get("/", (req, res) => {
 });
 
 // Start Server
-const server = app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
+);
 
+// Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Promise Rejection:", err.message);
   server.close(() => process.exit(1));
 });
 
+// Handle SIGTERM (graceful shutdown)
 process.on("SIGTERM", () => {
   console.log("SIGTERM Received. Closing server...");
   server.close(() => console.log("Server Closed."));
