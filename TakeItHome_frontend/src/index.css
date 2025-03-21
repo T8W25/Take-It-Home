@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.search-bar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px; 
+  }
+  
+  .search-input {
+    border-radius: 25px;
+    padding-left: 20px;
+    font-size: 16px;
+  }
+  
+  .search-button {
+    border-radius: 25px;
+    padding: 10px 20px;
+    margin-left: -5px;
+  }
+  
+  .search-button svg {
+    font-size: 18px;
+  }
+  
+  .search-bar-container form {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+  }
+  
