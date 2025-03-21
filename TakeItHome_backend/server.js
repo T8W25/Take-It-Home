@@ -1,4 +1,3 @@
-// ✅ server.js (Fixed & Clean)
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -18,48 +17,35 @@ if (!process.env.MONGO_URI) {
   process.exit(1);
 }
 
-// CORS Middleware
-app.use(cors({
-  origin: "http://localhost:5173",
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type,Authorization"
-}));
+// **CORS Middleware**
+app.use(cors({ origin: "*", methods: "GET,POST,PUT,DELETE", allowedHeaders: "Content-Type,Authorization" }));
 
-// Middleware
+// **Middleware**
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images & videos
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("✅ MongoDB Connected"))
-.catch((err) => {
-  console.error("MongoDB Connection Error:", err.message);
-  process.exit(1);
-});
+// **Connect to MongoDB**
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => {
+    console.error("MongoDB Connection Error:", err.message);
+    process.exit(1);
+  });
 
-// Routes
+// **Routes**
 app.use("/api/auth", authRoutes);
 app.use("/api/trade-items", tradeItemRoutes);
 
-// Root Route
+// **Default API Route**
 app.get("/", (req, res) => {
   res.send("TakeItHome API is running...");
 });
 
-// Server Start
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// **Start Server**
+const server = app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Promise Rejection:", err.message);
   server.close(() => process.exit(1));
-});
-
-process.on("SIGTERM", () => {
-  console.log("SIGTERM Received. Closing server...");
-  server.close(() => console.log("Server Closed."));
 });

@@ -1,4 +1,3 @@
-// ✅ PostItem.jsx (frontend UI + fetch items + post item form)
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 
@@ -8,6 +7,7 @@ function PostItem() {
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const [video, setVideo] = useState(null); // Support video upload
   const [message, setMessage] = useState(null);
   const [items, setItems] = useState([]);
 
@@ -17,6 +17,7 @@ function PostItem() {
     fetchItems();
   }, []);
 
+  // Fetch posted items from the backend
   const fetchItems = async () => {
     try {
       const res = await fetch(`${API_BASE}/all`);
@@ -27,10 +28,11 @@ function PostItem() {
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !category || !condition || !description || !image) {
-      setMessage({ type: "danger", text: "All fields are required" });
+    if (!title || !category || !condition || !description) {
+      setMessage({ type: "danger", text: "All fields except video are required!" });
       return;
     }
 
@@ -39,16 +41,15 @@ function PostItem() {
     formData.append("category", category);
     formData.append("condition", condition);
     formData.append("description", description);
-    formData.append("image", image);
+    if (image) formData.append("image", image);
+    if (video) formData.append("video", video); // Add video if provided
 
     try {
-      const token = localStorage.getItem("jwtToken");
+      const token = localStorage.getItem("jwtToken"); // Ensure user authentication
       const res = await fetch(`${API_BASE}/post`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
 
       const result = await res.json();
@@ -56,13 +57,14 @@ function PostItem() {
         throw new Error(result.message || "Error posting item");
       }
 
-      setMessage({ type: "success", text: "Item posted successfully" });
+      setMessage({ type: "success", text: "Item posted successfully!" });
       setTitle("");
       setCategory("");
       setCondition("");
       setDescription("");
       setImage(null);
-      fetchItems();
+      setVideo(null);
+      fetchItems(); // Refresh posted items
     } catch (err) {
       console.error("Post error:", err);
       setMessage({ type: "danger", text: err.message });
@@ -85,12 +87,13 @@ function PostItem() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter item name"
+                required
               />
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Category</Form.Label>
-              <Form.Select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <Form.Select value={category} onChange={(e) => setCategory(e.target.value)} required>
                 <option value="">Select Category</option>
                 <option value="Electronics">Electronics</option>
                 <option value="Furniture">Furniture</option>
@@ -101,7 +104,7 @@ function PostItem() {
 
             <Form.Group className="mb-3">
               <Form.Label>Condition</Form.Label>
-              <Form.Select value={condition} onChange={(e) => setCondition(e.target.value)}>
+              <Form.Select value={condition} onChange={(e) => setCondition(e.target.value)} required>
                 <option value="">Select Condition</option>
                 <option value="New">New</option>
                 <option value="Used">Used</option>
@@ -116,6 +119,7 @@ function PostItem() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter item description"
+                required
               />
             </Form.Group>
 
@@ -125,6 +129,15 @@ function PostItem() {
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImage(e.target.files[0])}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Upload Video (Optional)</Form.Label>
+              <Form.Control
+                type="file"
+                accept="video/*"
+                onChange={(e) => setVideo(e.target.files[0])}
               />
             </Form.Group>
 
@@ -147,6 +160,12 @@ function PostItem() {
                   src={`http://localhost:3000${item.imageUrl}`}
                   style={{ maxHeight: "200px", objectFit: "cover" }}
                 />
+              )}
+              {item.videoUrl && (
+                <video width="100%" controls>
+                  <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               )}
               <Card.Body>
                 <Card.Title>{item.title}</Card.Title>
