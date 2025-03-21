@@ -1,62 +1,52 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import Button from "react-bootstrap/Button";
+import React, { useEffect, useState } from "react";
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import Button from 'react-bootstrap/Button';
 
 const NavBar = () => {
-  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if user is logged in
-  const isAuthenticated = !!localStorage.getItem("token");
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+    setIsLoggedIn(!!token);
+  }, []);
 
-  // Logout Function
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear token
-    localStorage.removeItem("user"); // Clear user info
-    navigate("/login"); // Redirect to login page
+    localStorage.removeItem("jwtToken");
+    setIsLoggedIn(false);
+    window.location.href = "/login";
   };
 
   return (
     <Navbar bg="dark" data-bs-theme="dark">
       <Container>
-        <Navbar.Brand as={Link} to="/">
+        <Navbar.Brand href="/">
           <img
             alt="logo"
             src="./logo.png"
             width="80"
             height="60"
             style={{ borderRadius: "50%", objectFit: "cover" }}
-            className="d-inline-block align-top logo-circle"
+            className="d-inline-block align-top"
           />
         </Navbar.Brand>
 
         <Nav className="me-auto">
-          <Nav.Link as={Link} to="/">Home</Nav.Link>
-          <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
-          <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
-
-          {/* Show "Post Item" only if user is logged in */}
-          {isAuthenticated && (
-            <Nav.Link as={Link} to="/post-item">Post Item</Nav.Link>
-          )}
+          <Nav.Link href="/">Home</Nav.Link>
+          <Nav.Link href="/explore">Explore</Nav.Link>
+          <Nav.Link href="/contact">Contact</Nav.Link>
+          {isLoggedIn && <Nav.Link href="/post-item">Post Item</Nav.Link>}
         </Nav>
 
         <Nav className="ms-auto">
-          {isAuthenticated ? (
-            <Button variant="outline-light" className="me-2" onClick={handleLogout}>
-              Logout
-            </Button>
-          ) : (
+          {!isLoggedIn ? (
             <>
-              <Button as={Link} to="/login" variant="outline-light" className="me-2">
-                Login
-              </Button>
-              <Button as={Link} to="/signup" variant="primary">
-                Sign Up
-              </Button>
+              <Button href="/login" variant="outline-light" className="me-2">Login</Button>
+              <Button href="/signup" variant="primary">Sign Up</Button>
             </>
+          ) : (
+            <Button variant="danger" onClick={handleLogout}>Logout</Button>
           )}
         </Nav>
       </Container>

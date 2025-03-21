@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
+// ✅ PostItem.jsx (frontend UI + fetch items + post item form)
+import React, { useState, useEffect } from "react";
+import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 
 function PostItem() {
   const [title, setTitle] = useState("");
@@ -7,26 +8,65 @@ function PostItem() {
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
-  const [message, setMessage] = useState(null); // Success/Error messages
+  const [message, setMessage] = useState(null);
+  const [items, setItems] = useState([]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const API_BASE = "http://localhost:3000/api/trade-items";
 
-    // Validation for empty fields
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItems = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/all`);
+      const data = await res.json();
+      setItems(data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!title || !category || !condition || !description || !image) {
       setMessage({ type: "danger", text: "All fields are required" });
       return;
     }
 
-    // Success message (for UI testing)
-    setMessage({ type: "success", text: "Trade item submitted! (Backend Pending)" });
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("category", category);
+    formData.append("condition", condition);
+    formData.append("description", description);
+    formData.append("image", image);
 
-    // Reset fields after submission
-    setTitle("");
-    setCategory("");
-    setCondition("");
-    setDescription("");
-    setImage(null);
+    try {
+      const token = localStorage.getItem("jwtToken");
+      const res = await fetch(`${API_BASE}/post`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.message || "Error posting item");
+      }
+
+      setMessage({ type: "success", text: "Item posted successfully" });
+      setTitle("");
+      setCategory("");
+      setCondition("");
+      setDescription("");
+      setImage(null);
+      fetchItems();
+    } catch (err) {
+      console.error("Post error:", err);
+      setMessage({ type: "danger", text: err.message });
+    }
   };
 
   return (
@@ -37,83 +77,88 @@ function PostItem() {
 
           {message && <Alert variant={message.type}>{message.text}</Alert>}
 
-          <Form onSubmit={handleSubmit}>
-            {/* Item Name */}
+          <Form onSubmit={handleSubmit} encType="multipart/form-data">
             <Form.Group className="mb-3">
               <Form.Label>Item Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter item name"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                required
+                placeholder="Enter item name"
               />
             </Form.Group>
 
-            {/* Category */}
             <Form.Group className="mb-3">
               <Form.Label>Category</Form.Label>
-              <Form.Control
-                as="select"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
+              <Form.Select value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="">Select Category</option>
                 <option value="Electronics">Electronics</option>
                 <option value="Furniture">Furniture</option>
                 <option value="Clothing">Clothing</option>
                 <option value="Books">Books</option>
-                <option value="Sports">Sports</option>
-              </Form.Control>
+              </Form.Select>
             </Form.Group>
 
-            {/* Condition */}
             <Form.Group className="mb-3">
               <Form.Label>Condition</Form.Label>
-              <Form.Control
-                as="select"
-                value={condition}
-                onChange={(e) => setCondition(e.target.value)}
-                required
-              >
+              <Form.Select value={condition} onChange={(e) => setCondition(e.target.value)}>
                 <option value="">Select Condition</option>
                 <option value="New">New</option>
                 <option value="Used">Used</option>
-                <option value="Refurbished">Refurbished</option>
-              </Form.Control>
+              </Form.Select>
             </Form.Group>
 
-            {/* Description */}
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                placeholder="Enter item description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
+                placeholder="Enter item description"
               />
             </Form.Group>
 
-            {/* Upload Image */}
             <Form.Group className="mb-3">
               <Form.Label>Upload Image</Form.Label>
               <Form.Control
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImage(e.target.files[0])}
-                required
               />
             </Form.Group>
 
-            {/* Submit Button */}
-            <Button variant="primary" type="submit" className="w-100">
+            <Button type="submit" variant="primary" className="w-100">
               Post Item
             </Button>
           </Form>
         </Col>
+      </Row>
+
+      <hr className="my-5" />
+      <h3 className="text-center">Posted Items</h3>
+      <Row>
+        {items.map((item) => (
+          <Col md={4} key={item._id} className="mb-4">
+            <Card>
+              {item.imageUrl && (
+                <Card.Img
+                  variant="top"
+                  src={`http://localhost:3000${item.imageUrl}`}
+                  style={{ maxHeight: "200px", objectFit: "cover" }}
+                />
+              )}
+              <Card.Body>
+                <Card.Title>{item.title}</Card.Title>
+                <Card.Text>{item.description}</Card.Text>
+                <Card.Text>
+                  <strong>Category:</strong> {item.category} <br />
+                  <strong>Condition:</strong> {item.condition}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
       </Row>
     </Container>
   );
