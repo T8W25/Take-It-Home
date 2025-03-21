@@ -1,12 +1,20 @@
 const express = require("express");
-const { postTradeItem, getAllTradeItems } = require("../controllers/tradeItem.controller");
-const { authenticate } = require("../middleware/authMiddleware");
-const multer = require("multer");
-
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const multer = require("multer");
+const { getTradeItems, createTradeItems } = require("../controllers/tradeItem.controller.js");
 
-router.post("/post", authenticate, upload.single("image"), postTradeItem); // Only logged-in users
-router.get("/all", getAllTradeItems); // Publicly accessible
+// Multer Configuration for Image Uploads
+const storage = multer.diskStorage({
+    destination: "./uploads/",
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+// Routes
+router.get("/", getTradeItems);
+router.post("/", upload.single("image"), createTradeItems); // 📌 Handles image uploads
 
 module.exports = router;
