@@ -8,7 +8,7 @@ const donationItemSchema = new mongoose.Schema({
   description: { type: String, required: true },
   imageUrl: { type: String },
   videoUrl: { type: String },
-  location: { type: String, required: true }, // Location (optional)
+  location: { type: String, required: true }, 
 
 }, { timestamps: true });
 

@@ -15,11 +15,11 @@ const getDonationItems = async (req, res) => {
 // POST a New Donation Item
 const createDonationItem = async (req, res) => {
   try {
-    const { title, category, condition, description } = req.body;
+    const { title, category, condition, description, location } = req.body;
     const imageUrl = req.files?.image ? `/uploads/${req.files.image[0].filename}` : null;
     const videoUrl = req.files?.video ? `/uploads/${req.files.video[0].filename}` : null;
 
-    if (!title || !category || !condition || !description || (!imageUrl && !videoUrl)) {
+    if (!title || !category || !condition || !description || !location || (!imageUrl && !videoUrl)) {
       return res.status(400).json({ message: "All fields are required with at least one media." });
     }
 
@@ -30,6 +30,7 @@ const createDonationItem = async (req, res) => {
       description,
       imageUrl,
       videoUrl,
+      location,
     });
 
     await newItem.save();

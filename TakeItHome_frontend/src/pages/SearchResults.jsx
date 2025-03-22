@@ -45,7 +45,12 @@ function SearchResults() {
   };
 
   const applyFilters = () => {
-    setSearchParams({ q: keyword, ...filters });
+    setSearchParams({
+      q: keyword,
+      type: filters.type,
+      category: filters.category,
+      location: filters.location, // Include location in query params
+    });
   };
 
   return (
