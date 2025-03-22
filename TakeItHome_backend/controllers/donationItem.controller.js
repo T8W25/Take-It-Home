@@ -64,8 +64,20 @@ const searchDonationItems = async (req, res) => {
   }
 };
 
+
+// **GET DONATION ITEM BY ID**
+const getDonationItemById = async (req, res) => {
+  try {
+    const item = await DonationItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Donation item not found" });
+    res.status(200).json(item);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 module.exports = {
   getDonationItems,
   createDonationItem,
-  searchDonationItems
+  searchDonationItems,
+  getDonationItemById
 };

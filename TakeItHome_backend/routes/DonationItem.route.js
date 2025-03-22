@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const { authenticate } = require("../middleware/authMiddleware");
 const { createDonationItem, getDonationItems, searchDonationItems } = require("../controllers/DonationItem.controller");
-
+const { getDonationItemById } = require("../controllers/DonationItem.controller");
 
 // Multer Storage Config
 const storage = multer.diskStorage({
@@ -28,5 +28,7 @@ router.post(
 );
 
 router.get("/search", searchDonationItems);
+router.get("/:id", getDonationItemById); 
+
 
 module.exports = router;
