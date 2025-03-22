@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom"; // ✅ FIXED: Added missing import
-import { Link } from "react-router-dom"; // ✅ Needed for linking each card
 
 function PostItem() {
   const [title, setTitle] = useState("");
@@ -13,15 +12,15 @@ function PostItem() {
   const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
   const [items, setItems] = useState([]);
-  const [editingItem, setEditingItem] = useState(null);
-  const [deletingItem, setDeletingItem] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editItemId, setEditItemId] = useState(null);
 
   const API_BASE = "http://localhost:3000/api/trade-items";
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [navigate]);
 
   const fetchItems = async () => {
     try {
@@ -37,7 +36,7 @@ function PostItem() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !category || !condition || !description || !location || !(image || video)) {
+    if (!title || !category || !condition || !description || !location || (!image && !video && !editMode)) {
       setMessage({ type: "danger", text: "All fields (including location) are required with at least one media file." });
       return;
     }
@@ -55,8 +54,8 @@ function PostItem() {
 
     try {
       let res;
-      if (editingItem) {
-        res = await fetch(`${API_BASE}/update/${editingItem._id}`, {
+      if (editMode) {
+        res = await fetch(`${API_BASE}/update/${editItemId}`, {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -73,20 +72,11 @@ function PostItem() {
         });
       }
 
-      if (!res.ok) throw new Error("Failed to post item");
+      if (!res.ok) throw new Error(editMode ? "Failed to update item" : "Failed to post item");
 
       const result = await res.json();
-      setMessage({ type: "success", text: editingItem ? "Item updated successfully!" : "Item posted successfully!" });
-
-      // Reset
-      setTitle("");
-      setCategory("");
-      setCondition("");
-      setDescription("");
-      setLocation("");
-      setImage(null);
-      setVideo(null);
-      setEditingItem(null);
+      setMessage({ type: "success", text: editMode ? "Item updated successfully!" : "Item posted successfully!" });
+      resetForm();
       fetchItems();
     } catch (err) {
       console.error("❌ Post error:", err);
@@ -94,52 +84,56 @@ function PostItem() {
     }
   };
 
-  const handleEditClick = (item) => {
-    setEditingItem(item);
+  const resetForm = () => {
+    setTitle("");
+    setCategory("");
+    setCondition("");
+    setDescription("");
+    setLocation("");
+    setImage(null);
+    setVideo(null);
+    setEditMode(false);
+    setEditItemId(null);
+  };
+
+  const handleEdit = (item) => {
+    setEditMode(true);
+    setEditItemId(item._id);
     setTitle(item.title);
     setCategory(item.category);
     setCondition(item.condition);
     setDescription(item.description);
     setLocation(item.location);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDeleteClick = (postId) => {
-    setDeletingItem(postId);
-  };
-
-  const confirmDelete = async () => {
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    const token = localStorage.getItem("jwtToken");
     try {
-      const token = localStorage.getItem("jwtToken");
-      const res = await fetch(`${API_BASE}/delete/${deletingItem}`, {
+      const res = await fetch(`${API_BASE}/delete/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to delete item");
-      setMessage({ type: "success", text: "Item deleted successfully!" });
       fetchItems();
     } catch (err) {
       console.error("❌ Delete error:", err);
-      setMessage({ type: "danger", text: err.message });
     }
-    setDeletingItem(null);
-  };
-
-  const cancelDelete = () => {
-    setDeletingItem(null);
   };
 
   return (
     <Container>
       <Row className="justify-content-md-center mt-5">
         <Col xs={12} md={6}>
-          <h2 className="text-center mb-4">{editingItem ? "Edit" : "Post a"} Trade Item</h2>
+          <h2 className="text-center mb-4">{editMode ? "Edit" : "Post a"} Trade Item</h2>
 
           {message && <Alert variant={message.type}>{message.text}</Alert>}
 
           <Form onSubmit={handleSubmit} encType="multipart/form-data">
             <Form.Group className="mb-3">
               <Form.Label>Item Name</Form.Label>
-              <Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+              <Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter item name" required />
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -156,7 +150,7 @@ function PostItem() {
 
             <Form.Group className="mb-3">
               <Form.Label>Location</Form.Label>
-              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} required />
+              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter your location" required />
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -170,16 +164,15 @@ function PostItem() {
 
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} required />
+              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter item description" required />
             </Form.Group>
 
-            {!editingItem && (
+            {!editMode && (
               <>
                 <Form.Group className="mb-3">
                   <Form.Label>Upload Image</Form.Label>
                   <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
                 </Form.Group>
-
                 <Form.Group className="mb-3">
                   <Form.Label>Upload Video (Optional)</Form.Label>
                   <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
@@ -188,13 +181,12 @@ function PostItem() {
             )}
 
             <Button type="submit" variant="primary" className="w-100">
-              {editingItem ? "Update Item" : "Post Item"}
+              {editMode ? "Update Item" : "Post Item"}
             </Button>
           </Form>
         </Col>
       </Row>
 
-      {/* Display Items */}
       <hr className="my-5" />
       <h3 className="text-center">Posted Items</h3>
       <Row>
@@ -207,7 +199,6 @@ function PostItem() {
               {!item.imageUrl && item.videoUrl && (
                 <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
                   <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
-                  Your browser does not support the video tag.
                 </video>
               )}
               <Card.Body>
@@ -218,24 +209,13 @@ function PostItem() {
                   <strong>Condition:</strong> {item.condition} <br />
                   <strong>Location:</strong> {item.location}
                 </Card.Text>
-                <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>{" "}
-                <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
+                <Button variant="warning" className="me-2" onClick={() => handleEdit(item)}>Edit</Button>
+                <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
-
-      {/* Delete Confirmation */}
-      {deletingItem && (
-        <div className="modal">
-          <div className="modal-content">
-            <h5>Are you sure you want to delete this post?</h5>
-            <Button variant="danger" onClick={confirmDelete}>Yes, Delete</Button>{" "}
-            <Button variant="secondary" onClick={cancelDelete}>Cancel</Button>
-          </div>
-        </div>
-      )}
     </Container>
   );
 }
