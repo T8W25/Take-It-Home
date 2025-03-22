@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
+import {Route} from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Button from 'react-bootstrap/Button';
-
+import SearchBar from './SearchBar';
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -41,6 +42,12 @@ const NavBar = () => {
         </Nav>
 
         <Nav className="ms-auto">
+
+        <div className="me-3">
+          {/* <Route render={({history}) => <SearchBar history={history}/>} /> */}
+          <SearchBar />
+        </div>
+        
           {!isLoggedIn ? (
             <>
               <Button href="/login" variant="outline-light" className="me-2">Login</Button>
@@ -56,3 +63,4 @@ const NavBar = () => {
 };
 
 export default NavBar;
+

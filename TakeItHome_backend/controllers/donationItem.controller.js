@@ -15,12 +15,21 @@ const getDonationItems = async (req, res) => {
 // ✅ POST: Create new donation item
 const createDonationItem = async (req, res) => {
   try {
+
     const { title, category, condition, description } = req.body;
     const imageUrl = req.files?.image?.[0] ? `/uploads/${req.files.image[0].filename}` : null;
     const videoUrl = req.files?.video?.[0] ? `/uploads/${req.files.video[0].filename}` : null;
 
     if (!title || !category || !condition || !description || (!imageUrl && !videoUrl)) {
       return res.status(400).json({ message: "All fields and at least one media are required." });
+
+    const { title, category, condition, description, location } = req.body;
+    const imageUrl = req.files?.image ? `/uploads/${req.files.image[0].filename}` : null;
+    const videoUrl = req.files?.video ? `/uploads/${req.files.video[0].filename}` : null;
+
+    if (!title || !category || !condition || !description || !location || (!imageUrl && !videoUrl)) {
+      return res.status(400).json({ message: "All fields are required with at least one media." });
+
     }
 
     // ✅ Log for debugging
@@ -33,7 +42,11 @@ const createDonationItem = async (req, res) => {
       description,
       imageUrl,
       videoUrl,
+
       userId: req.user.id // ✅ This must be here
+
+      location,
+
     });
     
     await newItem.save();
@@ -43,6 +56,7 @@ const createDonationItem = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 
 // ✅ PUT: Edit donation item
 // updateDonationItem
@@ -94,4 +108,45 @@ module.exports = {
   createDonationItem,
   updateDonationItem,
   deleteDonationItem,
+
+// **SEARCH DONATION ITEMS**
+const searchDonationItems = async (req, res) => {
+  try {
+    const { q, category, location } = req.query;
+
+    // Build query for search and filters
+    const query = {};
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } }
+      ];
+    }
+    if (category) query.category = category;
+    if (location) query.location = location;
+
+    const items = await DonationItem.find(query);
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+// **GET DONATION ITEM BY ID**
+const getDonationItemById = async (req, res) => {
+  try {
+    const item = await DonationItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Donation item not found" });
+    res.status(200).json(item);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+module.exports = {
+  getDonationItems,
+  createDonationItem,
+  searchDonationItems,
+  getDonationItemById
+
 };

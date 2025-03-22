@@ -9,7 +9,12 @@ const cors = require("cors");
 // ✅ Import Routes
 const authRoutes = require("./routes/auth.route.js");
 const tradeItemRoutes = require("./routes/TradeItem.route.js");
+
 const donationItemRoutes = require("./routes/DonationItem.route.js");
+
+const donationItemRoutes = require("./routes/DonationItem.route.js"); // ✅ Added route
+const searchRoutes = require("./routes/search.route.js"); // Import search routes
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,7 +46,12 @@ mongoose.connect(process.env.MONGO_URI)
 // ✅ Mount Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/trade-items", tradeItemRoutes);
+
 app.use("/api/donation-items", donationItemRoutes);
+
+app.use("/api/donation-items", donationItemRoutes); // ✅ Important!
+app.use("/api/search", searchRoutes); 
+
 
 // ✅ Default Route
 app.get("/", (req, res) => {
