@@ -1,5 +1,7 @@
+// ✅ PostItem.jsx (Fully Updated: Fetch + Post + Token + Reload Fix + Video Preview)
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 
 function PostItem() {
   const [title, setTitle] = useState("");
@@ -9,16 +11,15 @@ function PostItem() {
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
-  const [items, setItems] = useState([]); // ✅ Stores posted items
+  const [items, setItems] = useState([]);
 
   const API_BASE = "http://localhost:3000/api/trade-items";
+  const location = useLocation();
 
-  // ✅ Fetch items when the page loads
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [location]);
 
-  // ✅ Function to Fetch Items
   const fetchItems = async () => {
     try {
       const res = await fetch(`${API_BASE}/all`);
@@ -26,13 +27,12 @@ function PostItem() {
         throw new Error("Failed to fetch items");
       }
       const data = await res.json();
-      setItems(data); // ✅ Store fetched items
+      setItems(data);
     } catch (err) {
       console.error("❌ Fetch error:", err);
     }
   };
 
-  // ✅ Handle Submit Function
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -49,33 +49,30 @@ function PostItem() {
     if (image) formData.append("image", image);
     if (video) formData.append("video", video);
 
+    const token = localStorage.getItem("jwtToken");
+
     try {
       const res = await fetch(`${API_BASE}/post`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
-      // ✅ LOG THE RAW RESPONSE
-      const text = await res.text();
-      console.log("RAW RESPONSE:", text);
-      
-      const result = JSON.parse(text);
       if (!res.ok) {
-        throw new Error(result.message || "Failed to post item");
+        throw new Error("Failed to post item");
       }
 
-      console.log("✅ Item Posted:", result);
+      const result = await res.json();
       setMessage({ type: "success", text: "Item posted successfully!" });
 
-      // ✅ Clear Form
       setTitle("");
       setCategory("");
       setCondition("");
       setDescription("");
       setImage(null);
       setVideo(null);
-
-      // ✅ Fetch updated items
       fetchItems();
     } catch (err) {
       console.error("❌ Post error:", err);
@@ -105,6 +102,7 @@ function PostItem() {
                 <option value="Furniture">Furniture</option>
                 <option value="Clothing">Clothing</option>
                 <option value="Books">Books</option>
+                <option value="Sports">Sports</option>
               </Form.Select>
             </Form.Group>
 
@@ -146,6 +144,14 @@ function PostItem() {
               {item.imageUrl && (
                 <Card.Img variant="top" src={`http://localhost:3000${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
               )}
+
+              {!item.imageUrl && item.videoUrl && (
+                <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
+                  <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+
               <Card.Body>
                 <Card.Title>{item.title}</Card.Title>
                 <Card.Text>{item.description}</Card.Text>

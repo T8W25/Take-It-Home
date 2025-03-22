@@ -1,20 +1,29 @@
 const express = require("express");
-const multer = require("multer");
-const { getDonationItems, createDonationItem } = require("../controllers/donationItem.controller");
-
 const router = express.Router();
+const multer = require("multer");
+const { authenticate } = require("../middleware/authMiddleware");
+const { createDonationItem, getDonationItems } = require("../controllers/DonationItem.controller");
 
-// ✅ Configure Multer for image uploads
+// Multer Storage Config
 const storage = multer.diskStorage({
   destination: "./uploads/",
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
-  }
+  },
 });
+
 const upload = multer({ storage });
 
-// ✅ Routes
-router.get("/", getDonationItems);  // Get all donations
-router.post("/", upload.single("image"), createDonationItem);  // Post a donation
+// Routes
+router.get("/all", getDonationItems);
+router.post(
+  "/post",
+  authenticate,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]),
+  createDonationItem
+);
 
 module.exports = router;
