@@ -1,4 +1,3 @@
-// ✅ PostItemDonation.jsx (Fully Updated with Image & Video Fetch/Post Support)
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
@@ -12,6 +11,8 @@ function PostItemDonation() {
   const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
   const [items, setItems] = useState([]);
+  const [editingItem, setEditingItem] = useState(null);
+  const [deletingItem, setDeletingItem] = useState(null);
 
   const API_BASE = "http://localhost:3000/api/donation-items";
   const location = useLocation();
@@ -50,21 +51,34 @@ function PostItemDonation() {
     const token = localStorage.getItem("jwtToken");
 
     try {
-      const res = await fetch(`${API_BASE}/post`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      let res;
+      if (editingItem) {
+        // If editing an existing donation item
+        res = await fetch(`${API_BASE}/update/${editingItem._id}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+      } else {
+        // If posting a new donation item
+        res = await fetch(`${API_BASE}/post`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+      }
 
       if (!res.ok) {
         const errData = await res.text();
-        throw new Error(errData || "Failed to post donation item");
+        throw new Error(errData || "Failed to post or update donation item");
       }
 
       const result = await res.json();
-      setMessage({ type: "success", text: "Donation item posted successfully!" });
+      setMessage({ type: "success", text: editingItem ? "Donation item updated successfully!" : "Donation item posted successfully!" });
 
       setTitle("");
       setCategory("");
@@ -72,11 +86,52 @@ function PostItemDonation() {
       setDescription("");
       setImage(null);
       setVideo(null);
+      setEditingItem(null);
       fetchItems();
     } catch (err) {
       console.error("❌ Post error:", err);
       setMessage({ type: "danger", text: err.message });
     }
+  };
+
+  const handleEditClick = (item) => {
+    setEditingItem(item);
+    setTitle(item.title);
+    setCategory(item.category);
+    setCondition(item.condition);
+    setDescription(item.description);
+    // You can add handling of images or videos if necessary
+  };
+
+  const handleDeleteClick = (postId) => {
+    setDeletingItem(postId);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const token = localStorage.getItem("jwtToken");
+      const res = await fetch(`${API_BASE}/delete/${deletingItem}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete donation item");
+      }
+
+      setMessage({ type: "success", text: "Donation item deleted successfully!" });
+      fetchItems();
+    } catch (err) {
+      console.error("❌ Delete error:", err);
+      setMessage({ type: "danger", text: err.message });
+    }
+    setDeletingItem(null); // Close the confirmation modal
+  };
+
+  const cancelDelete = () => {
+    setDeletingItem(null); // Close the confirmation modal without deleting
   };
 
   return (
@@ -129,7 +184,9 @@ function PostItemDonation() {
               <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
             </Form.Group>
 
-            <Button type="submit" variant="primary" className="w-100">Post Donation Item</Button>
+            <Button type="submit" variant="primary" className="w-100">
+              {editingItem ? "Update Donation Item" : "Post Donation Item"}
+            </Button>
           </Form>
         </Col>
       </Row>
@@ -156,11 +213,25 @@ function PostItemDonation() {
                   <strong>Category:</strong> {item.category} <br />
                   <strong>Condition:</strong> {item.condition}
                 </Card.Text>
+                {/* Edit and Delete buttons */}
+                <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>
+                <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
+
+      {/* Delete Confirmation Modal */}
+      {deletingItem && (
+        <div className="modal">
+          <div className="modal-content">
+            <h5>Are you sure you want to delete this donation item?</h5>
+            <Button variant="danger" onClick={confirmDelete}>Yes, Delete</Button>
+            <Button variant="secondary" onClick={cancelDelete}>Cancel</Button>
+          </div>
+        </div>
+      )}
     </Container>
   );
 }
