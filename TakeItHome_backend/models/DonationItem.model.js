@@ -8,6 +8,8 @@ const donationItemSchema = new mongoose.Schema({
   description: { type: String, required: true },
   imageUrl: { type: String },
   videoUrl: { type: String },
+  location: { type: String, required: true }, // Location (optional)
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("DonationItem", donationItemSchema);

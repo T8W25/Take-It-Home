@@ -40,7 +40,31 @@ const createDonationItem = async (req, res) => {
   }
 };
 
+// **SEARCH DONATION ITEMS**
+const searchDonationItems = async (req, res) => {
+  try {
+    const { q, category, location } = req.query;
+
+    // Build query for search and filters
+    const query = {};
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } }
+      ];
+    }
+    if (category) query.category = category;
+    if (location) query.location = location;
+
+    const items = await DonationItem.find(query);
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   getDonationItems,
   createDonationItem,
+  searchDonationItems
 };

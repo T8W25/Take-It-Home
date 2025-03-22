@@ -11,12 +11,14 @@ import PostItem from './pages/Postitem';
 import DonateItem from './pages/PostitemDonation';
 import './App.css';
 import PostItemDonation from './pages/PostitemDonation';
+import SearchResults from './pages/SearchResults';
 
 function App() {
   return (
     <>
       <NavBar />
       <Routes>
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/contact" element={<Contact />} />

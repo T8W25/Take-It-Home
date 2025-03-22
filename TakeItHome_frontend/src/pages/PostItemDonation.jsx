@@ -8,17 +8,18 @@ function PostItemDonation() {
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
   const [items, setItems] = useState([]);
 
   const API_BASE = "http://localhost:3000/api/donation-items";
-  const location = useLocation();
+  const navigate = useLocation();
 
   useEffect(() => {
     fetchItems();
-  }, [location]);
+  }, [navigate]);
 
   const fetchItems = async () => {
     try {
@@ -34,7 +35,7 @@ function PostItemDonation() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !category || !condition || !description || (!image && !video)) {
+    if (!title || !category || !condition || !description || !location || (!image && !video)) {
       setMessage({ type: "danger", text: "All fields are required, including at least one media file." });
       return;
     }
@@ -44,6 +45,7 @@ function PostItemDonation() {
     formData.append("category", category);
     formData.append("condition", condition);
     formData.append("description", description);
+    formData.append("location", location);
     if (image) formData.append("image", image);
     if (video) formData.append("video", video);
 
@@ -70,6 +72,7 @@ function PostItemDonation() {
       setCategory("");
       setCondition("");
       setDescription("");
+      setLocation("");
       setImage(null);
       setVideo(null);
       fetchItems();
@@ -120,6 +123,11 @@ function PostItemDonation() {
             </Form.Group>
 
             <Form.Group className="mb-3">
+              <Form.Label>Location</Form.Label>
+              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter your location" required />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
               <Form.Label>Upload Image</Form.Label>
               <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
             </Form.Group>
@@ -134,6 +142,7 @@ function PostItemDonation() {
         </Col>
       </Row>
 
+      {/* display Donation Items here */}
       <hr className="my-5" />
       <h3 className="text-center">Donation Items</h3>
       <Row>
@@ -155,6 +164,7 @@ function PostItemDonation() {
                 <Card.Text>
                   <strong>Category:</strong> {item.category} <br />
                   <strong>Condition:</strong> {item.condition}
+                  <strong>Location:</strong> {item.location}
                 </Card.Text>
               </Card.Body>
             </Card>

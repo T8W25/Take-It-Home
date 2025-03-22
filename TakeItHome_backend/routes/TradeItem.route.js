@@ -1,7 +1,8 @@
 const express = require("express");
 const multer = require("multer");
-const { getTradeItems, createTradeItem } = require("../controllers/tradeItem.controller");
+const { getTradeItems, createTradeItem, searchTradeItems} = require("../controllers/tradeItem.controller");
 const { authenticate } = require("../middleware/authMiddleware");
+
 
 const router = express.Router();
 
@@ -27,5 +28,8 @@ router.post(
   ]), // Support both image & video
   createTradeItem
 );
+
+router.get("/search", searchTradeItems); // Now properly initialized
+
 
 module.exports = router;

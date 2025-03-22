@@ -9,6 +9,7 @@ const tradeItemSchema = new mongoose.Schema(
     description: { type: String, required: true },
     imageUrl: { type: String, default: "" }, // Image URL
     videoUrl: { type: String, default: "" }, // Video URL (optional)
+    location: { type: String, required: true }, // Location (optional)
   },
   { timestamps: true }
 );

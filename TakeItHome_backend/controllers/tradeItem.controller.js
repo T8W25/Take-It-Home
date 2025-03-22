@@ -19,11 +19,11 @@ const createTradeItem = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized: Please log in" });
     }
 
-    const { title, description, category, condition } = req.body;
+    const { title, description, category, condition, location} = req.body;
     let imageUrl = req.files?.image ? `/uploads/${req.files.image[0].filename}` : "";
     let videoUrl = req.files?.video ? `/uploads/${req.files.video[0].filename}` : ""; // Video upload
 
-    if (!title || !description || !category || !condition) {
+    if (!title || !description || !category || !condition || !location) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -35,6 +35,7 @@ const createTradeItem = async (req, res) => {
       condition,
       imageUrl,
       videoUrl,
+      location,
     });
 
     await newTradeItem.save();
@@ -45,4 +46,27 @@ const createTradeItem = async (req, res) => {
   }
 };
 
-module.exports = { getTradeItems, createTradeItem };
+// **SEARCH TRADE ITEMS**
+const searchTradeItems = async (req, res) => {
+  try {
+    const { q, category, location } = req.query;
+
+    // Build query for search and filters
+    const query = {};
+    if (q) {
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } }
+      ];
+    }
+    if (category) query.category = category;
+    if (location) query.location = location;
+
+    const items = await TradeItem.find(query).populate("user", "name email");
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { getTradeItems, createTradeItem, searchTradeItems };
