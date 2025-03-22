@@ -1,11 +1,12 @@
+// ✅ Cleaned & FINAL TradeItem.route.js
 const express = require("express");
 const multer = require("multer");
 const { getTradeItems, createTradeItem } = require("../controllers/tradeItem.controller");
-const { authenticate } = require("../middleware/authMiddleware");
+const { verifyToken } = require("../middleware/authmiddleware");
 
 const router = express.Router();
 
-// **Multer Storage Configuration (Allowing Images & Videos)**
+// ✅ Multer Setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./uploads/");
@@ -17,14 +18,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// ✅ Routes
 router.get("/all", getTradeItems);
+
 router.post(
   "/post",
-  authenticate,
+  verifyToken,
   upload.fields([
     { name: "image", maxCount: 1 },
     { name: "video", maxCount: 1 },
-  ]), // Support both image & video
+  ]),
   createTradeItem
 );
 

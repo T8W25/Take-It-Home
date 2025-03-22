@@ -1,4 +1,4 @@
-// ✅ PostItemDonation.jsx (Fully Updated with Image & Video Fetch/Post Support)
+// ✅ PostItemDonation.jsx (Edit & Delete Donation Items with Token Support)
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
@@ -12,6 +12,8 @@ function PostItemDonation() {
   const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
   const [items, setItems] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [editItemId, setEditItemId] = useState(null);
 
   const API_BASE = "http://localhost:3000/api/donation-items";
   const location = useLocation();
@@ -33,8 +35,7 @@ function PostItemDonation() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title || !category || !condition || !description || (!image && !video)) {
+    if (!title || !category || !condition || !description || (!image && !video && !editMode)) {
       setMessage({ type: "danger", text: "All fields are required, including at least one media file." });
       return;
     }
@@ -50,28 +51,31 @@ function PostItemDonation() {
     const token = localStorage.getItem("jwtToken");
 
     try {
-      const res = await fetch(`${API_BASE}/post`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errData = await res.text();
-        throw new Error(errData || "Failed to post donation item");
+      let res;
+      if (editMode) {
+        res = await fetch(`${API_BASE}/edit/${editItemId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title, category, condition, description }),
+        });
+      } else {
+        res = await fetch(`${API_BASE}/post`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
       }
 
-      const result = await res.json();
-      setMessage({ type: "success", text: "Donation item posted successfully!" });
+      if (!res.ok) throw new Error(editMode ? "Failed to update donation item" : "Failed to post donation item");
 
-      setTitle("");
-      setCategory("");
-      setCondition("");
-      setDescription("");
-      setImage(null);
-      setVideo(null);
+      const result = await res.json();
+      setMessage({ type: "success", text: editMode ? "Item updated successfully!" : "Item posted successfully!" });
+      resetForm();
       fetchItems();
     } catch (err) {
       console.error("❌ Post error:", err);
@@ -79,11 +83,47 @@ function PostItemDonation() {
     }
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setCategory("");
+    setCondition("");
+    setDescription("");
+    setImage(null);
+    setVideo(null);
+    setEditMode(false);
+    setEditItemId(null);
+  };
+
+  const handleEdit = (item) => {
+    setEditMode(true);
+    setEditItemId(item._id);
+    setTitle(item.title);
+    setCategory(item.category);
+    setCondition(item.condition);
+    setDescription(item.description);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    const token = localStorage.getItem("jwtToken");
+    try {
+      const res = await fetch(`${API_BASE}/delete/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete item");
+      fetchItems();
+    } catch (err) {
+      console.error("❌ Delete error:", err);
+    }
+  };
+
   return (
     <Container>
       <Row className="justify-content-md-center mt-5">
         <Col xs={12} md={6}>
-          <h2 className="text-center mb-4">Post a Donation Item</h2>
+          <h2 className="text-center mb-4">{editMode ? "Edit" : "Post a"} Donation Item</h2>
 
           {message && <Alert variant={message.type}>{message.text}</Alert>}
 
@@ -119,17 +159,23 @@ function PostItemDonation() {
               <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter item description" />
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Upload Image</Form.Label>
-              <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
-            </Form.Group>
+            {!editMode && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Upload Image</Form.Label>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Upload Video (Optional)</Form.Label>
-              <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
-            </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Upload Video (Optional)</Form.Label>
+                  <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
+                </Form.Group>
+              </>
+            )}
 
-            <Button type="submit" variant="primary" className="w-100">Post Donation Item</Button>
+            <Button type="submit" variant="primary" className="w-100">
+              {editMode ? "Update Item" : "Post Donation Item"}
+            </Button>
           </Form>
         </Col>
       </Row>
@@ -146,7 +192,6 @@ function PostItemDonation() {
               {item.videoUrl && (
                 <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
                   <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
-                  Your browser does not support the video tag.
                 </video>
               )}
               <Card.Body>
@@ -156,6 +201,8 @@ function PostItemDonation() {
                   <strong>Category:</strong> {item.category} <br />
                   <strong>Condition:</strong> {item.condition}
                 </Card.Text>
+                <Button variant="warning" className="me-2" onClick={() => handleEdit(item)}>Edit</Button>
+                <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
               </Card.Body>
             </Card>
           </Col>
