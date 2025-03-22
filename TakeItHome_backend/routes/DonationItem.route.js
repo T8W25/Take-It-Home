@@ -1,34 +1,43 @@
+// ✅ Final: DonationItem.route.js
 const express = require("express");
 const router = express.Router();
 
 const { verifyToken } = require("../middleware/authmiddleware");
 const upload = require("../middleware/multer.middleware");
 
-const multer = require("multer");
-const { authenticate } = require("../middleware/authMiddleware");
-const { createDonationItem, getDonationItems, searchDonationItems } = require("../controllers/DonationItem.controller");
-const { getDonationItemById } = require("../controllers/DonationItem.controller");
-
-
 const {
   getDonationItems,
   createDonationItem,
   updateDonationItem,
   deleteDonationItem,
+  searchDonationItems,
+  getDonationItemById
 } = require("../controllers/donationItem.controller");
 
-// Routes
-router.get("/all", getDonationItems);
-router.post("/post", verifyToken, upload.fields([
-  { name: "image", maxCount: 1 },
-  { name: "video", maxCount: 1 }
-]), createDonationItem);
+// ✅ ROUTES
 
+// Get all donation items
+router.get("/all", getDonationItems);
+
+// Create a new donation item with image/video
+router.post(
+  "/post",
+  verifyToken,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]),
+  createDonationItem
+);
+
+// Update donation item
 router.put("/edit/:id", verifyToken, updateDonationItem);
+
+// Delete donation item
 router.delete("/delete/:id", verifyToken, deleteDonationItem);
 
+// Search or get by ID
 router.get("/search", searchDonationItems);
-router.get("/:id", getDonationItemById); 
-
+router.get("/:id", getDonationItemById);
 
 module.exports = router;

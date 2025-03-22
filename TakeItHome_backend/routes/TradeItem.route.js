@@ -1,18 +1,18 @@
-// ✅ Cleaned & FINAL TradeItem.route.js
+// ✅ Clean & Final TradeItem.route.js
 const express = require("express");
 const multer = require("multer");
+const {
+  getTradeItems,
+  createTradeItem,
+  searchTradeItems,
+  getTradeItemById
+} = require("../controllers/tradeItem.controller");
 
-const { getTradeItems, createTradeItem } = require("../controllers/tradeItem.controller");
 const { verifyToken } = require("../middleware/authmiddleware");
-
-const { getTradeItems, createTradeItem, searchTradeItems} = require("../controllers/tradeItem.controller");
-const { authenticate } = require("../middleware/authMiddleware");
-const { getTradeItemById } = require("../controllers/tradeItem.controller");
-
 
 const router = express.Router();
 
-// ✅ Multer Setup
+// ✅ Multer setup (uploads image & video to /uploads folder)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./uploads/");
@@ -21,12 +21,20 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
-
 const upload = multer({ storage });
 
 // ✅ Routes
+
+// Get all trade items
 router.get("/all", getTradeItems);
 
+// Search trade items (GET with query)
+router.get("/search", searchTradeItems);
+
+// Get item by ID
+router.get("/:id", getTradeItemById);
+
+// Post new trade item (with token + upload)
 router.post(
   "/post",
   verifyToken,
@@ -37,11 +45,4 @@ router.post(
   createTradeItem
 );
 
-
 module.exports = router;
-router.get("/search", searchTradeItems); // Now properly initialized
-router.get("/:id", getTradeItemById); 
-
-
-module.exports = router;
-

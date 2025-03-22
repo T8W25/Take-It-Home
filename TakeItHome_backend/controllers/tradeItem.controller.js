@@ -12,44 +12,36 @@ const getTradeItems = async (req, res) => {
 };
 
 // POST a new trade item
+// tradeItem.controller.js
+
 const createTradeItem = async (req, res) => {
   try {
-    const { title, category, condition, description } = req.body;
-    const imageUrl = req.files?.image?.[0] ? `/uploads/${req.files.image[0].filename}` : null;
-    const videoUrl = req.files?.video?.[0] ? `/uploads/${req.files.video[0].filename}` : null;
+    const { title, description, category, condition, location } = req.body;
 
-    if (!title || !category || !condition || !description || (!imageUrl && !videoUrl)) {
+    const imageUrl = req.files?.image?.[0]
+      ? `/uploads/${req.files.image[0].filename}`
+      : null;
+    const videoUrl = req.files?.video?.[0]
+      ? `/uploads/${req.files.video[0].filename}`
+      : null;
+
+    if (!title || !description || !category || !condition || (!imageUrl && !videoUrl)) {
       return res.status(400).json({ message: "All fields and at least one media are required." });
     }
 
-
-    const newItem = new TradeItem({ title, category, condition, description, imageUrl, videoUrl });
-    await newItem.save();
-
-    res.status(201).json({ message: "Trade item created", tradeItem: newItem });
-
-    const { title, description, category, condition, location} = req.body;
-    let imageUrl = req.files?.image ? `/uploads/${req.files.image[0].filename}` : "";
-    let videoUrl = req.files?.video ? `/uploads/${req.files.video[0].filename}` : ""; // Video upload
-
-    if (!title || !description || !category || !condition || !location) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const newTradeItem = new TradeItem({
-      user: req.user.id,
+    const newItem = new TradeItem({
       title,
       description,
       category,
       condition,
+      location,
       imageUrl,
       videoUrl,
-      location,
     });
 
-    await newTradeItem.save();
-    res.status(201).json({ message: "Trade item created successfully", tradeItem: newTradeItem });
+    await newItem.save();
 
+    res.status(201).json({ message: "Trade item created", tradeItem: newItem });
   } catch (error) {
     console.error("❌ Create Trade Error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });

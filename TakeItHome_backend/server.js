@@ -11,8 +11,6 @@ const authRoutes = require("./routes/auth.route.js");
 const tradeItemRoutes = require("./routes/TradeItem.route.js");
 
 const donationItemRoutes = require("./routes/DonationItem.route.js");
-
-const donationItemRoutes = require("./routes/DonationItem.route.js"); // ✅ Added route
 const searchRoutes = require("./routes/search.route.js"); // Import search routes
 
 

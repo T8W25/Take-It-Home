@@ -1,5 +1,3 @@
-
-// ✅ PostItemDonation.jsx (Edit & Delete Donation Items with Token Support)
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
@@ -9,7 +7,7 @@ function PostItemDonation() {
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState(""); // Add location state
+  const [location, setLocation] = useState("");
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
   const [message, setMessage] = useState(null);
@@ -38,14 +36,8 @@ function PostItemDonation() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !category || !condition || !description || (!image && !video && !editMode)) {
-      setMessage({ type: "danger", text: "All fields are required, including at least one media file." });
-
-
-    // Validation: Ensure location is provided
-    if (!title || !category || !condition || !description || !location || (!image && !video)) {
+    if (!title || !category || !condition || !description || !location || (!image && !video && !editMode)) {
       setMessage({ type: "danger", text: "All fields (including location) are required with at least one media file." });
-
       return;
     }
 
@@ -54,7 +46,7 @@ function PostItemDonation() {
     formData.append("category", category);
     formData.append("condition", condition);
     formData.append("description", description);
-    formData.append("location", location); // Include location in form data
+    formData.append("location", location);
     if (image) formData.append("image", image);
     if (video) formData.append("video", video);
 
@@ -69,7 +61,7 @@ function PostItemDonation() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ title, category, condition, description }),
+          body: JSON.stringify({ title, category, condition, description, location })
         });
       } else {
         res = await fetch(`${API_BASE}/post`, {
@@ -83,22 +75,10 @@ function PostItemDonation() {
 
       if (!res.ok) throw new Error(editMode ? "Failed to update donation item" : "Failed to post donation item");
 
-
       const result = await res.json();
       setMessage({ type: "success", text: editMode ? "Item updated successfully!" : "Item posted successfully!" });
       resetForm();
       fetchItems();
-
-      // Reset fields
-      setTitle("");
-      setCategory("");
-      setCondition("");
-      setDescription("");
-      setLocation(""); // Reset location
-      setImage(null);
-      setVideo(null);
-      fetchItems(); // Refresh items list
-
     } catch (err) {
       console.error("❌ Post error:", err);
       setMessage({ type: "danger", text: err.message });
@@ -110,6 +90,7 @@ function PostItemDonation() {
     setCategory("");
     setCondition("");
     setDescription("");
+    setLocation("");
     setImage(null);
     setVideo(null);
     setEditMode(false);
@@ -123,6 +104,7 @@ function PostItemDonation() {
     setCategory(item.category);
     setCondition(item.condition);
     setDescription(item.description);
+    setLocation(item.location);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -150,26 +132,14 @@ function PostItemDonation() {
           {message && <Alert variant={message.type}>{message.text}</Alert>}
 
           <Form onSubmit={handleSubmit} encType="multipart/form-data">
-            {/* Item Name */}
             <Form.Group className="mb-3">
               <Form.Label>Item Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter item name"
-                required
-              />
+              <Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter item name" required />
             </Form.Group>
 
-            {/* Category */}
             <Form.Group className="mb-3">
               <Form.Label>Category</Form.Label>
-              <Form.Select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
+              <Form.Select value={category} onChange={(e) => setCategory(e.target.value)} required>
                 <option value="">Select Category</option>
                 <option value="Electronics">Electronics</option>
                 <option value="Furniture">Furniture</option>
@@ -179,45 +149,24 @@ function PostItemDonation() {
               </Form.Select>
             </Form.Group>
 
-            {/* Location */}
             <Form.Group className="mb-3">
               <Form.Label>Location</Form.Label>
-              <Form.Control
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Enter your location"
-                required
-              />
+              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter your location" required />
             </Form.Group>
 
-            {/* Condition */}
             <Form.Group className="mb-3">
               <Form.Label>Condition</Form.Label>
-              <Form.Select
-                value={condition}
-                onChange={(e) => setCondition(e.target.value)}
-                required
-              >
+              <Form.Select value={condition} onChange={(e) => setCondition(e.target.value)} required>
                 <option value="">Select Condition</option>
                 <option value="New">New</option>
                 <option value="Used">Used</option>
               </Form.Select>
             </Form.Group>
 
-            {/* Description */}
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter item description"
-                required
-              />
+              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter item description" required />
             </Form.Group>
-
 
             {!editMode && (
               <>
@@ -225,7 +174,6 @@ function PostItemDonation() {
                   <Form.Label>Upload Image</Form.Label>
                   <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
                 </Form.Group>
-
                 <Form.Group className="mb-3">
                   <Form.Label>Upload Video (Optional)</Form.Label>
                   <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
@@ -235,38 +183,11 @@ function PostItemDonation() {
 
             <Button type="submit" variant="primary" className="w-100">
               {editMode ? "Update Item" : "Post Donation Item"}
-
-            {/* Upload Image */}
-            <Form.Group className="mb-3">
-              <Form.Label>Upload Image</Form.Label>
-              <Form.Control
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                required
-              />
-            </Form.Group>
-
-            {/* Upload Video (Optional) */}
-            <Form.Group className="mb-3">
-              <Form.Label>Upload Video (Optional)</Form.Label>
-              <Form.Control
-                type="file"
-                accept="video/*"
-                onChange={(e) => setVideo(e.target.files[0])}
-              />
-            </Form.Group>
-
-            {/* Submit Button */}
-            <Button type="submit" variant="primary" className="w-100">
-              Post Donation Item
-
             </Button>
           </Form>
         </Col>
       </Row>
 
-      {/* Display Donation Items */}
       <hr className="my-5" />
       <h3 className="text-center">Donation Items</h3>
       <Row>
@@ -274,28 +195,11 @@ function PostItemDonation() {
           <Col md={4} key={item._id} className="mb-4">
             <Card>
               {item.imageUrl && (
-                <Card.Img
-                  variant="top"
-                  src={`http://localhost:3000${item.imageUrl}`}
-                  style={{ maxHeight: "200px", objectFit: "cover" }}
-                />
+                <Card.Img variant="top" src={`http://localhost:3000${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
               )}
-
-              {item.videoUrl && (
+              {!item.imageUrl && item.videoUrl && (
                 <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
                   <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
-
-              {!item.imageUrl && item.videoUrl && (
-                <video
-                  controls
-                  style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}
-                >
-                  <source
-                    src={`http://localhost:3000${item.videoUrl}`}
-                    type="video/mp4"
-                  />
-                  Your browser does not support the video tag.
-
                 </video>
               )}
               <Card.Body>
@@ -304,7 +208,7 @@ function PostItemDonation() {
                 <Card.Text>
                   <strong>Category:</strong> {item.category} <br />
                   <strong>Condition:</strong> {item.condition} <br />
-                  <strong>Location:</strong> {item.location} {/* Display location */}
+                  <strong>Location:</strong> {item.location}
                 </Card.Text>
                 <Button variant="warning" className="me-2" onClick={() => handleEdit(item)}>Edit</Button>
                 <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
