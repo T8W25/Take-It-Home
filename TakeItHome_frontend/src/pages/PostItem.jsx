@@ -55,13 +55,14 @@ function PostItem() {
     try {
       let res;
       if (editMode) {
-        res = await fetch(`${API_BASE}/update/${editItemId}`, {
-          method: "PUT",
+        res = await fetch(`${API_BASE}/edit/${editItemId}`, {
+          method: "POST", // using POST instead of PUT
           headers: {
             Authorization: `Bearer ${token}`,
           },
           body: formData,
         });
+        
       } else {
         res = await fetch(`${API_BASE}/post`, {
           method: "POST",

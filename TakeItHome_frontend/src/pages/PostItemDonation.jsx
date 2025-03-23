@@ -124,82 +124,128 @@ function PostItemDonation() {
   };
 
   return (
-    <Container>
-      <Row className="justify-content-md-center mt-5">
-        <Col xs={12} md={6}>
-          <h2 className="text-center mb-4">{editMode ? "Edit" : "Post a"} Donation Item</h2>
+    <Container fluid className="mt-5">
+  {message && (
+    <Row className="justify-content-center">
+      <Col md={8}>
+        <Alert variant={message.type}>{message.text}</Alert>
+      </Col>
+    </Row>
+  )}
 
-          {message && <Alert variant={message.type}>{message.text}</Alert>}
+  <Row>
+    {/* LEFT - POST FORM */}
+    <Col md={4} className="px-4">
+      <h3 className="mb-4 text-center">{editMode ? "Edit Item" : "Post New Item"}</h3>
 
-          <Form onSubmit={handleSubmit} encType="multipart/form-data">
+      <Form onSubmit={handleSubmit} encType="multipart/form-data">
+        {/* Title */}
+        <Form.Group className="mb-3">
+          <Form.Label>Item Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter item name"
+            required
+          />
+        </Form.Group>
+
+        {/* Category */}
+        <Form.Group className="mb-3">
+          <Form.Label>Category</Form.Label>
+          <Form.Select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          >
+            <option value="">Select Category</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Books">Books</option>
+            <option value="Sports">Sports</option>
+          </Form.Select>
+        </Form.Group>
+
+        {/* Location */}
+        <Form.Group className="mb-3">
+          <Form.Label>Location</Form.Label>
+          <Form.Control
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Enter your location"
+            required
+          />
+        </Form.Group>
+
+        {/* Condition */}
+        <Form.Group className="mb-3">
+          <Form.Label>Condition</Form.Label>
+          <Form.Select
+            value={condition}
+            onChange={(e) => setCondition(e.target.value)}
+            required
+          >
+            <option value="">Select Condition</option>
+            <option value="New">New</option>
+            <option value="Used">Used</option>
+          </Form.Select>
+        </Form.Group>
+
+        {/* Description */}
+        <Form.Group className="mb-3">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter item description"
+            required
+          />
+        </Form.Group>
+
+        {/* Media Upload */}
+        {!editMode && (
+          <>
             <Form.Group className="mb-3">
-              <Form.Label>Item Name</Form.Label>
-              <Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter item name" required />
+              <Form.Label>Upload Image</Form.Label>
+              <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
             </Form.Group>
-
             <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
-              <Form.Select value={category} onChange={(e) => setCategory(e.target.value)} required>
-                <option value="">Select Category</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Furniture">Furniture</option>
-                <option value="Clothing">Clothing</option>
-                <option value="Books">Books</option>
-                <option value="Sports">Sports</option>
-              </Form.Select>
+              <Form.Label>Upload Video (Optional)</Form.Label>
+              <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
             </Form.Group>
+          </>
+        )}
 
-            <Form.Group className="mb-3">
-              <Form.Label>Location</Form.Label>
-              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter your location" required />
-            </Form.Group>
+        {/* Submit */}
+        <Button type="submit" variant="primary" className="w-100">
+          {editMode ? "Update Item" : "Post Item"}
+        </Button>
+      </Form>
+    </Col>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Condition</Form.Label>
-              <Form.Select value={condition} onChange={(e) => setCondition(e.target.value)} required>
-                <option value="">Select Condition</option>
-                <option value="New">New</option>
-                <option value="Used">Used</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter item description" required />
-            </Form.Group>
-
-            {!editMode && (
-              <>
-                <Form.Group className="mb-3">
-                  <Form.Label>Upload Image</Form.Label>
-                  <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Upload Video (Optional)</Form.Label>
-                  <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
-                </Form.Group>
-              </>
-            )}
-
-            <Button type="submit" variant="primary" className="w-100">
-              {editMode ? "Update Item" : "Post Donation Item"}
-            </Button>
-          </Form>
-        </Col>
-      </Row>
-
-      <hr className="my-5" />
-      <h3 className="text-center">Donation Items</h3>
+    {/* RIGHT - POSTED ITEMS */}
+    <Col md={8}>
+      <h3 className="text-center mb-4">Posted Items</h3>
       <Row>
         {items.map((item) => (
-          <Col md={4} key={item._id} className="mb-4">
+          <Col md={6} key={item._id} className="mb-4">
             <Card>
               {item.imageUrl && (
-                <Card.Img variant="top" src={`http://localhost:3000${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
+                <Card.Img
+                  variant="top"
+                  src={`http://localhost:3000${item.imageUrl}`}
+                  style={{ maxHeight: "200px", objectFit: "cover" }}
+                />
               )}
-              {!item.imageUrl && item.videoUrl && (
+              {item.videoUrl && (
                 <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
                   <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
+                  Your browser does not support the video tag.
                 </video>
               )}
               <Card.Body>
@@ -210,14 +256,19 @@ function PostItemDonation() {
                   <strong>Condition:</strong> {item.condition} <br />
                   <strong>Location:</strong> {item.location}
                 </Card.Text>
-                <Button variant="warning" className="me-2" onClick={() => handleEdit(item)}>Edit</Button>
-                <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
+                <div className="d-flex justify-content-between">
+                  <Button variant="warning" onClick={() => handleEdit(item)}>Edit</Button>
+                  <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
+                </div>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
-    </Container>
+    </Col>
+  </Row>
+</Container>
+
   );
 }
 

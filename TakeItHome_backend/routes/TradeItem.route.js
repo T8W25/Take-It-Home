@@ -1,10 +1,8 @@
-// ✅ Final: TradeItem.route.js
 const express = require("express");
 const router = express.Router();
 
+const multer = require("multer");
 const { verifyToken } = require("../middleware/authmiddleware");
-const upload = require("../middleware/multer.middleware");
-
 const {
   getTradeItems,
   createTradeItem,
@@ -14,12 +12,22 @@ const {
   getTradeItemById,
 } = require("../controllers/tradeItem.controller");
 
+// ✅ Multer Setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage });
+
 // ✅ Routes
-
-// Get all trade items
 router.get("/all", getTradeItems);
+router.get("/search", searchTradeItems);
+router.get("/:id", getTradeItemById);
 
-// Create a new trade item with image/video
 router.post(
   "/post",
   verifyToken,
@@ -30,14 +38,17 @@ router.post(
   createTradeItem
 );
 
-// Update trade item
-router.put("/edit/:id", verifyToken, updateTradeItem);
+router.put(
+  "/update/:id",
+  verifyToken,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 }
+  ]),
+  updateTradeItem
+);
 
-// Delete trade item
+
 router.delete("/delete/:id", verifyToken, deleteTradeItem);
-
-// Search trade items or get by query
-router.get("/search", searchTradeItems);
-router.get("/:id", getTradeItemById);
 
 module.exports = router;
