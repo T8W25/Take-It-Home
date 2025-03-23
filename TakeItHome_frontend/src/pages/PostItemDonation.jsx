@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 
 function PostItemDonation() {
   const [title, setTitle] = useState("");
@@ -15,7 +17,7 @@ function PostItemDonation() {
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
 
-  const API_BASE = "http://localhost:3000/api/donation-items";
+  const API_BASE = "http://localhost:3002/api/donation-items";
   const navigate = useLocation();
 
   useEffect(() => {
@@ -193,27 +195,30 @@ function PostItemDonation() {
       <Row>
         {items.map((item) => (
           <Col md={4} key={item._id} className="mb-4">
-            <Card>
-              {item.imageUrl && (
-                <Card.Img variant="top" src={`http://localhost:3000${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
-              )}
-              {!item.imageUrl && item.videoUrl && (
-                <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                  <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
-                </video>
-              )}
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Card.Text>
-                  <strong>Category:</strong> {item.category} <br />
-                  <strong>Condition:</strong> {item.condition} <br />
-                  <strong>Location:</strong> {item.location}
-                </Card.Text>
-                <Button variant="warning" className="me-2" onClick={() => handleEdit(item)}>Edit</Button>
-                <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
-              </Card.Body>
-            </Card>
+            <Link to={`/donate/${item._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Card>
+                {item.imageUrl && (
+                  <Card.Img variant="top" src={`http://localhost:3002${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
+                )}
+                {!item.imageUrl && item.videoUrl && (
+                  <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
+                    <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                  </video>
+                )}
+                <Card.Body>
+                  <Card.Title>{item.title}</Card.Title>
+                  <Card.Text>{item.description}</Card.Text>
+                  <Card.Text>
+                    <strong>Category:</strong> {item.category} <br />
+                    <strong>Condition:</strong> {item.condition} <br />
+                    <strong>Location:</strong> {item.location}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Link>
+            {/* Keep these outside the link */}
+            <Button variant="warning" className="me-2 mt-2" onClick={() => handleEdit(item)}>Edit</Button>
+            <Button variant="danger" className="mt-2" onClick={() => handleDelete(item._id)}>Delete</Button>
           </Col>
         ))}
       </Row>
