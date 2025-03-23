@@ -13,6 +13,10 @@ import './App.css';
 import PostItemDonation from './pages/PostitemDonation';
 import SearchResults from './pages/SearchResults';
 import ItemDetail from './pages/ItemDetail';
+import './App.css';
+import PostsPage from './pages/PostsPage';
+
+
 
 function App() {
   return (
@@ -28,6 +32,9 @@ function App() {
         <Route path="/post-item" element={<PostItem />} />
         <Route path="/donate-item" element={<PostItemDonation />} />
         <Route path="/item/:type/:id" element={<ItemDetail />} />
+        <div className="App">
+      <PostsPage />
+    </div>
 
       </Routes>
     </>
