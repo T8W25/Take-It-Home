@@ -20,7 +20,7 @@ function SearchResults() {
     const fetchResults = async () => {
       try {
         // Inside useEffect
-        const response = await axios.get("http://localhost:3000/api/search", {
+        const response = await axios.get("http://localhost:3002/api/search", {
             params: {
             q: keyword,
             type: filters.type, // "trade" or "donation"

@@ -11,7 +11,7 @@ function ItemDetail() {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/${type}-items/${id}`);
+        const response = await axios.get(`http://localhost:3002/api/${type}-items/${id}`);
         setItem(response.data);
       } catch (error) {
         setMessage("Item not found or an error occurred");
@@ -31,13 +31,13 @@ function ItemDetail() {
           {/* Media Section */}
           {item.imageUrl && (
             <Card.Img
-              src={`http://localhost:3000${item.imageUrl}`}
+              src={`http://localhost:3002${item.imageUrl}`}
               style={{ maxHeight: "400px", objectFit: "cover" }}
             />
           )}
           {item.videoUrl && (
             <video controls style={{ width: "100%", maxHeight: "400px" }}>
-              <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
+              <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           )}
