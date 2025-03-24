@@ -1,14 +1,17 @@
+
+// src/pages/SearchResults.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Alert, Form, Button, Card } from "react-bootstrap";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function SearchResults() {
   const [items, setItems] = useState([]);
   const [message, setMessage] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    type: searchParams.get("type") || "trade", // Default to "trade"
+    type: searchParams.get("type") || "trade",
     category: searchParams.get("category") || "",
     location: searchParams.get("location") || "",
   });
@@ -16,23 +19,23 @@ function SearchResults() {
   const keyword = searchParams.get("q") || "";
 
   useEffect(() => {
-    
     const fetchResults = async () => {
       try {
-        // Inside useEffect
         const response = await axios.get("http://localhost:3002/api/search", {
-            params: {
+          params: {
             q: keyword,
-            type: filters.type, // "trade" or "donation"
-            category: filters.category,
-            location: filters.location,
-            },
+            type: filters.type,
+            category: filters.category || undefined,
+            location: filters.location || undefined,
+          },
         });
 
         const data = response.data;
+        console.log(`Search Results (${filters.type}):`, data);
         setItems(data);
         setMessage(data.length > 0 ? `${data.length} items found` : "No items found");
       } catch (error) {
+        console.error("Search Fetch Error:", error.message);
         setMessage("An error occurred while searching");
       }
     };
@@ -49,37 +52,28 @@ function SearchResults() {
       q: keyword,
       type: filters.type,
       category: filters.category,
-      location: filters.location, // Include location in query params
+      location: filters.location,
     });
   };
 
   return (
-    <Container>
-      <Row className="justify-content-md-center mt-5">
+    <Container className="mt-5">
+      <Row className="justify-content-md-center">
         <Col xs={12} md={8}>
+          <h3>Search Results for "{keyword || "All"}"</h3>
           {message && <Alert variant="info">{message}</Alert>}
 
-          {/* Filters */}
           <Form className="mb-4">
             <Form.Group className="mb-3">
               <Form.Label>Items</Form.Label>
-              <Form.Select
-                name="type"
-                value={filters.type}
-                onChange={handleFilterChange}
-              >
+              <Form.Select name="type" value={filters.type} onChange={handleFilterChange}>
                 <option value="trade">Trade Items</option>
                 <option value="donation">Donation Items</option>
               </Form.Select>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Category</Form.Label>
-              <Form.Select
-                name="category"
-                value={filters.category}
-                onChange={handleFilterChange}
-              >
+              <Form.Select name="category" value={filters.category} onChange={handleFilterChange}>
                 <option value="">All Categories</option>
                 <option value="Electronics">Electronics</option>
                 <option value="Furniture">Furniture</option>
@@ -88,7 +82,6 @@ function SearchResults() {
                 <option value="Sports">Sports</option>
               </Form.Select>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Location</Form.Label>
               <Form.Control
@@ -99,26 +92,52 @@ function SearchResults() {
                 placeholder="Enter location"
               />
             </Form.Group>
-
             <Button variant="primary" onClick={applyFilters}>
               Apply Filters
             </Button>
           </Form>
 
-          {/* Display Results */}
-          {items.map((item) => (
-            <Card key={item._id} className="mb-3">
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Card.Text>
-                  <strong>Category:</strong> {item.category} <br />
-                  <strong>Location:</strong> {item.location} <br />
-                  <strong>Condition:</strong> {item.condition}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          ))}
+          {items.length === 0 ? (
+            <Alert variant="warning">
+              No {filters.type} items found for "{keyword}". Try adjusting your search or filters.
+            </Alert>
+          ) : (
+            <Row>
+              {items.map((item) => (
+                <Col md={4} key={item._id} className="mb-3">
+                  <Link
+                    to={`/${filters.type === "trade" ? "trade" : "donate"}/${item._id}`} // Fix route here
+                    style={{ textDecoration: "none", color: "inherit" }}
+                    onClick={() => console.log(`Navigating to: /${filters.type === "trade" ? "trade" : "donate"}/${item._id}`)}
+                  >
+                    <Card>
+                      {item.imageUrl && (
+                        <Card.Img
+                          variant="top"
+                          src={`http://localhost:3002${item.imageUrl}`}
+                          style={{ height: "200px", objectFit: "cover" }}
+                        />
+                      )}
+                      {!item.imageUrl && item.videoUrl && (
+                        <video controls style={{ width: "100%", height: "200px", objectFit: "cover" }}>
+                          <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                        </video>
+                      )}
+                      <Card.Body>
+                        <Card.Title>{item.title}</Card.Title>
+                        <Card.Text>{item.description.substring(0, 100)}...</Card.Text>
+                        <Card.Text>
+                          <strong>Category:</strong> {item.category} <br />
+                          <strong>Location:</strong> {item.location} <br />
+                          <strong>Condition:</strong> {item.condition}
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          )}
         </Col>
       </Row>
     </Container>

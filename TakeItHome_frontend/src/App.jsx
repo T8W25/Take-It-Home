@@ -37,7 +37,8 @@ function App() {
         <Route path="/trade/:id/message" element={<MessageRequestTrade />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<Notifications />} />
-      </Routes>
+        <Route path="/search" element={<SearchResults />} />
+    </Routes>
     </>
   );
 }
