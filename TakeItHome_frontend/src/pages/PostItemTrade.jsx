@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"; // ✅ FIXED: Added missing import
-import { Link } from "react-router-dom"; // ✅ Needed for linking each card
+import { useNavigate, Link } from "react-router-dom";
 
-function PostItem() {
+function PostItemTrade() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
@@ -196,32 +195,39 @@ function PostItem() {
 
       {/* Display Items */}
       <hr className="my-5" />
-      <h3 className="text-center">Posted Items</h3>
+      <h3 className="text-center">Posted Trade Listings</h3>
       <Row>
         {items.map((item) => (
           <Col md={4} key={item._id} className="mb-4">
-            <Card>
-              {item.imageUrl && (
-                <Card.Img variant="top" src={`http://localhost:3002${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
-              )}
-              {!item.imageUrl && item.videoUrl && (
-                <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                  <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Card.Text>
-                  <strong>Category:</strong> {item.category} <br />
-                  <strong>Condition:</strong> {item.condition} <br />
-                  <strong>Location:</strong> {item.location}
-                </Card.Text>
-                <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>{" "}
-                <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
-              </Card.Body>
-            </Card>
+            <Link to={`/trade/${item._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <Card>
+                {item.imageUrl && (
+                  <Card.Img
+                    variant="top"
+                    src={`http://localhost:3002${item.imageUrl}`}
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                  />
+                )}
+                {!item.imageUrl && item.videoUrl && (
+                  <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
+                    <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                  </video>
+                )}
+                <Card.Body>
+                  <Card.Title>{item.title}</Card.Title>
+                  <Card.Text>{item.description}</Card.Text>
+                  <Card.Text>
+                    <strong>Category:</strong> {item.category} <br />
+                    <strong>Condition:</strong> {item.condition} <br />
+                    <strong>Location:</strong> {item.location}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Link>
+            <div className="mt-2 d-flex justify-content-between">
+              <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>
+              <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
+            </div>
           </Col>
         ))}
       </Row>
@@ -240,4 +246,4 @@ function PostItem() {
   );
 }
 
-export default PostItem;
+export default PostItemTrade;

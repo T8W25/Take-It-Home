@@ -5,6 +5,8 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Button from 'react-bootstrap/Button';
 import SearchBar from './SearchBar';
+import { Link } from 'react-router-dom';
+
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -37,8 +39,10 @@ const NavBar = () => {
           <Nav.Link href="/">Home</Nav.Link>
           <Nav.Link href="/explore">Explore</Nav.Link>
           <Nav.Link href="/contact">Contact</Nav.Link>
-          {isLoggedIn && <Nav.Link href="/post-item">Post Item</Nav.Link>}
-          {isLoggedIn && <Nav.Link href="/donate-item">Donation </Nav.Link>}
+          {isLoggedIn && <Nav.Link href="/trade-item">Trade</Nav.Link>}
+          {isLoggedIn && <Nav.Link href="/donate-item">Donate </Nav.Link>}
+          {isLoggedIn && <Nav.Link as={Link} to="/chat">Messages</Nav.Link>}
+          {isLoggedIn && <Nav.Link as={Link} to="/notifications">Notifications</Nav.Link>}
         </Nav>
 
         <Nav className="ms-auto">

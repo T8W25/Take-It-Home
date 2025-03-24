@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Spinner, Button } from 'react-bootstrap';
 
-const DonationItemDetail = () => {
+const TradeItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
@@ -11,7 +11,7 @@ const DonationItemDetail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/donation-items/${id}`);
+        const res = await fetch(`http://localhost:3002/api/trade-items/${id}`);
         if (!res.ok) throw new Error("Failed to fetch item");
         const data = await res.json();
         setItem(data);
@@ -30,7 +30,7 @@ const DonationItemDetail = () => {
 
   return (
     <Container className="mt-5">
-      <h3 className="text-center mb-4">Donation Listing Details</h3>
+      <h3 className="text-center mb-4">Trade Listing Details</h3>
       <Card>
         {item.imageUrl && (
           <Card.Img
@@ -55,11 +55,11 @@ const DonationItemDetail = () => {
             variant="primary"
             className="mt-3"
             onClick={() =>
-              navigate(`/donate/${item._id}/message`, {
+              navigate(`/trade/${item._id}/message`, {
                 state: {
                   itemTitle: item.title,
                   receiverId: item.userId,
-                  itemType: "donation"
+                  itemType: "trade"
                 }
               })
             }
@@ -72,4 +72,4 @@ const DonationItemDetail = () => {
   );
 };
 
-export default DonationItemDetail;
+export default TradeItemDetail;
