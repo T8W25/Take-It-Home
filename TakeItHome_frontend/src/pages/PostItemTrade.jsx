@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
-<<<<<<< HEAD:TakeItHome_frontend/src/pages/PostItemTrade.jsx
 import { useNavigate, Link } from "react-router-dom";
-=======
-import { useNavigate } from "react-router-dom"; // ✅ FIXED: Added missing import
->>>>>>> 6e68454eb27d5e844f19855eb584bbe2e606f44b:TakeItHome_frontend/src/pages/PostItem.jsx
 
 function PostItemTrade() {
   const [title, setTitle] = useState("");
@@ -197,7 +193,6 @@ function PostItemTrade() {
       <Row>
         {items.map((item) => (
           <Col md={4} key={item._id} className="mb-4">
-<<<<<<< HEAD:TakeItHome_frontend/src/pages/PostItemTrade.jsx
             <Link to={`/trade/${item._id}`} style={{ textDecoration: "none", color: "inherit" }}>
               <Card>
                 {item.imageUrl && (
@@ -227,29 +222,6 @@ function PostItemTrade() {
               <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>
               <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
             </div>
-=======
-            <Card>
-              {item.imageUrl && (
-                <Card.Img variant="top" src={`http://localhost:3000${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
-              )}
-              {!item.imageUrl && item.videoUrl && (
-                <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                  <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
-                </video>
-              )}
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Card.Text>
-                  <strong>Category:</strong> {item.category} <br />
-                  <strong>Condition:</strong> {item.condition} <br />
-                  <strong>Location:</strong> {item.location}
-                </Card.Text>
-                <Button variant="warning" className="me-2" onClick={() => handleEdit(item)}>Edit</Button>
-                <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
-              </Card.Body>
-            </Card>
->>>>>>> 6e68454eb27d5e844f19855eb584bbe2e606f44b:TakeItHome_frontend/src/pages/PostItem.jsx
           </Col>
         ))}
       </Row>
@@ -257,8 +229,4 @@ function PostItemTrade() {
   );
 }
 
-<<<<<<< HEAD:TakeItHome_frontend/src/pages/PostItemTrade.jsx
 export default PostItemTrade;
-=======
-export default PostItem;
->>>>>>> 6e68454eb27d5e844f19855eb584bbe2e606f44b:TakeItHome_frontend/src/pages/PostItem.jsx

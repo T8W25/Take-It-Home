@@ -235,7 +235,6 @@ function PostItemDonation() {
       <h3 className="text-center mb-4">Posted Items</h3>
       <Row>
         {items.map((item) => (
-<<<<<<< HEAD
           <Col md={4} key={item._id} className="mb-4">
             <Link to={`/donate/${item._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <Card>
@@ -261,37 +260,6 @@ function PostItemDonation() {
             {/* Keep these outside the link */}
             <Button variant="warning" className="me-2 mt-2" onClick={() => handleEdit(item)}>Edit</Button>
             <Button variant="danger" className="mt-2" onClick={() => handleDelete(item._id)}>Delete</Button>
-=======
-          <Col md={6} key={item._id} className="mb-4">
-            <Card>
-              {item.imageUrl && (
-                <Card.Img
-                  variant="top"
-                  src={`http://localhost:3000${item.imageUrl}`}
-                  style={{ maxHeight: "200px", objectFit: "cover" }}
-                />
-              )}
-              {item.videoUrl && (
-                <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                  <source src={`http://localhost:3000${item.videoUrl}`} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Card.Text>
-                  <strong>Category:</strong> {item.category} <br />
-                  <strong>Condition:</strong> {item.condition} <br />
-                  <strong>Location:</strong> {item.location}
-                </Card.Text>
-                <div className="d-flex justify-content-between">
-                  <Button variant="warning" onClick={() => handleEdit(item)}>Edit</Button>
-                  <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
-                </div>
-              </Card.Body>
-            </Card>
->>>>>>> 6e68454eb27d5e844f19855eb584bbe2e606f44b
           </Col>
         ))}
       </Row>

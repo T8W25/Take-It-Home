@@ -122,17 +122,10 @@ const searchTradeItems = async (req, res) => {
 const getTradeItemById = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);
-<<<<<<< HEAD
     if (!item) return res.status(404).json({ message: "Item not found" });
     res.status(200).json(item);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
-=======
-    if (!item) return res.status(404).json({ message: "Trade item not found" });
-    res.status(200).json(item);
-  } catch (error) {
-    res.status(500).json({ message: "Fetch by ID error", error: error.message });
->>>>>>> 6e68454eb27d5e844f19855eb584bbe2e606f44b
   }
 };
 
