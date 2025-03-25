@@ -110,33 +110,34 @@ const Notifications = () => {
 
       return (
         <Card key={req._id} className="mb-3">
-          <Card.Body>
-            <Card.Title>{req.itemId?.title || "Donation Item"}</Card.Title>
-            <Card.Text>
-              <strong>From:</strong> {req.senderId?.username || "Unknown"}<br />
-              <strong>Message:</strong> {req.message}<br />
-              <strong>Status:</strong>{" "}
-              <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
-                {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-              </span>
-            </Card.Text>
+  <Card.Body>
+    <Card.Title>{req.itemId?.title || ""} ({req.itemType === "trade" ? "Trade Item" : "Donation Item"})</Card.Title>
+    <Card.Text>
+      <strong>From:</strong> {req.senderId?.username || "Unknown"}<br />
+      <strong>Message:</strong> {req.message}<br />
+      <strong>Status:</strong>{" "}
+      <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
+        {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+      </span>
+    </Card.Text>
 
-            {isReceiver && req.status === "pending" && (
-              <>
-                <Button size="sm" variant="success" className="me-2" onClick={() => handleAction(req._id, "accept")}>Accept</Button>
-                <Button size="sm" variant="danger" onClick={() => handleAction(req._id, "decline")}>Decline</Button>
-              </>
-            )}
+    {isReceiver && req.status === "pending" && (
+      <>
+        <Button size="sm" variant="success" className="me-2" onClick={() => handleAction(req._id, "accept")}>Accept</Button>
+        <Button size="sm" variant="danger" onClick={() => handleAction(req._id, "decline")}>Decline</Button>
+      </>
+    )}
 
-            {isSender && req.status === "pending" && (
-              <Button size="sm" variant="warning" onClick={() => handleCancel(req._id)}>Cancel</Button>
-            )}
+    {isSender && req.status === "pending" && (
+      <Button size="sm" variant="warning" onClick={() => handleCancel(req._id)}>Cancel</Button>
+    )}
 
-            {req.status === "accepted" && (
-              <Button size="sm" variant="primary" className="mt-2" onClick={() => navigateToChat(req)}>Chat</Button>
-            )}
-          </Card.Body>
-        </Card>
+    {req.status === "accepted" && (
+      <Button size="sm" variant="primary" className="mt-2" onClick={() => navigateToChat(req)}>Chat</Button>
+    )}
+  </Card.Body>
+</Card>
+
       );
     });
 
