@@ -1,14 +1,16 @@
+// ✅ Updated Navbar.jsx with Account Dropdown
 import React, { useEffect, useState } from "react";
-import {Route} from 'react-router-dom';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import Button from 'react-bootstrap/Button';
-import SearchBar from './SearchBar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import Button from "react-bootstrap/Button";
+import SearchBar from "./SearchBar";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
@@ -18,13 +20,13 @@ const NavBar = () => {
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
     setIsLoggedIn(false);
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
-    <Navbar bg="dark" data-bs-theme="dark">
+    <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
-        <Navbar.Brand href="/">
+        <Navbar.Brand as={Link} to="/">
           <img
             alt="logo"
             src="./logo.png"
@@ -35,36 +37,41 @@ const NavBar = () => {
           />
         </Navbar.Brand>
 
-        <Nav className="me-auto">
-          <Nav.Link href="/">Home</Nav.Link>
-          <Nav.Link href="/explore">Explore</Nav.Link>
-          <Nav.Link href="/contact">Contact</Nav.Link>
-          {isLoggedIn && <Nav.Link href="/trade-item">Trade</Nav.Link>}
-          {isLoggedIn && <Nav.Link href="/donate-item">Donate </Nav.Link>}
-          {isLoggedIn && <Nav.Link as={Link} to="/chat">Messages</Nav.Link>}
-          {isLoggedIn && <Nav.Link as={Link} to="/notifications">Notifications</Nav.Link>}
-        </Nav>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/">Home</Nav.Link>
+            <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
+            <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
+            {isLoggedIn && <Nav.Link as={Link} to="/trade-item">Trade</Nav.Link>}
+            {isLoggedIn && <Nav.Link as={Link} to="/donate-item">Donate</Nav.Link>}
+          </Nav>
 
-        <Nav className="ms-auto">
+          <div className="me-3">
+            <SearchBar />
+          </div>
 
-        <div className="me-3">
-          {/* <Route render={({history}) => <SearchBar history={history}/>} /> */}
-          <SearchBar />
-        </div>
-        
-          {!isLoggedIn ? (
-            <>
-              <Button href="/login" variant="outline-light" className="me-2">Login</Button>
-              <Button href="/signup" variant="primary">Sign Up</Button>
-            </>
-          ) : (
-            <Button variant="danger" onClick={handleLogout}>Logout</Button>
-          )}
-        </Nav>
+          <Nav className="ms-auto">
+            <NavDropdown title="Account" id="account-dropdown" align="end">
+              {!isLoggedIn ? (
+                <>
+                  <NavDropdown.Item as={Link} to="/login">Login</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/signup">Sign Up</NavDropdown.Item>
+                </>
+              ) : (
+                <>
+                  <NavDropdown.Item as={Link} to="/chat">Messages</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/notifications">Notifications</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+                </>
+              )}
+            </NavDropdown>
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );
 };
 
 export default NavBar;
-
