@@ -22,6 +22,7 @@ function PostItemTrade() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userLocation, setUserLocation] = useState(""); // User's location for the request
   const [selectedItem, setSelectedItem] = useState(null);
+  const [requestStatus, setRequestStatus] = useState(null); // For request success/failure notification
 
   const API_BASE = "https://take-it-home-8ldm.onrender.com/api/trade-items";
   const navigate = useNavigate();
@@ -70,7 +71,6 @@ function PostItemTrade() {
           },
           body: formData,
         });
-        
       } else {
         res = await fetch(`${API_BASE}/post`, {
           method: "POST",
@@ -141,22 +141,25 @@ function PostItemTrade() {
       return;
     }
 
-    // Here, send the request to the backend API (you can customize this part)
-    console.log(`Request for Item: ${selectedItem.title}`);
-    console.log(`Name: ${name}`);
-    console.log(`Email: ${email}`);
-    console.log(`Phone Number: ${phoneNumber}`);
-    console.log(`Location: ${userLocation}`);
-    console.log(`Message: ${requestMessage}`);
+    try {
+      console.log(`Request for Item: ${selectedItem.title}`);
+      console.log(`Name: ${name}`);
+      console.log(`Email: ${email}`);
+      console.log(`Phone Number: ${phoneNumber}`);
+      console.log(`Location: ${userLocation}`);
+      console.log(`Message: ${requestMessage}`);
 
-    // Close the modal
-    setShowModal(false);
-    setRequestMessage("");
-    setName("");
-    setEmail("");
-    setPhoneNumber("");
-    setUserLocation("");
-    alert("Your request has been sent.");
+      setRequestStatus({ type: "success", text: "Your request has been sent successfully!" }); // Success notification
+      setShowModal(false); // Close the modal
+      setRequestMessage(""); // Clear request message
+      setName(""); // Clear name field
+      setEmail(""); // Clear email field
+      setPhoneNumber(""); // Clear phone number field
+      setUserLocation(""); // Clear user location field
+    } catch (err) {
+      console.error("❌ Request error:", err);
+      setRequestStatus({ type: "danger", text: "Failed to send request. Please try again later." });
+    }
   };
 
   return (
@@ -221,6 +224,9 @@ function PostItemTrade() {
               {editMode ? "Update Item" : "Post Item"}
             </Button>
           </Form>
+
+          {/* Display the request status notification */}
+          {requestStatus && <Alert variant={requestStatus.type}>{requestStatus.text}</Alert>}
         </Col>
       </Row>
 
