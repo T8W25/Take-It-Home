@@ -18,7 +18,7 @@ const NavBar = () => {
 
     if (token) {
       axios
-        .get("http://localhost:3002/api/users/profile", {
+        .get("https://take-it-home-8ldm.onrender.com/api/users/profile", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -39,7 +39,7 @@ const NavBar = () => {
   
     if (token) {
       axios
-        .get("http://localhost:3002/api/users/profile", {
+        .get("https://take-it-home-8ldm.onrender.com/api/users/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -94,7 +94,7 @@ const NavBar = () => {
               title={
                 <span>
                   <img
-                    src={profileImage ? `http://localhost:3002${profileImage}` : "/default-profile.png"}
+                    src={profileImage ? `https://take-it-home-8ldm.onrender.com${profileImage}` : "/default-profile.png"}
                     alt="Profile"
                     width="30"
                     height="30"

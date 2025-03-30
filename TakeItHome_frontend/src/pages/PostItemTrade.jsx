@@ -15,7 +15,7 @@ function PostItemTrade() {
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
 
-  const API_BASE = "http://localhost:3002/api/trade-items";
+  const API_BASE = "https://take-it-home-8ldm.onrender.com/api/trade-items";
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -198,13 +198,13 @@ function PostItemTrade() {
                 {item.imageUrl && (
                   <Card.Img
                     variant="top"
-                    src={`http://localhost:3002${item.imageUrl}`}
+                    src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
                     style={{ maxHeight: "200px", objectFit: "cover" }}
                   />
                 )}
                 {!item.imageUrl && item.videoUrl && (
                   <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                    <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                    <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
                   </video>
                 )}
                 <Card.Body>

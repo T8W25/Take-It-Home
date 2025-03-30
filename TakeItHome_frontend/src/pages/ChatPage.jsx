@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import io from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
 
-const socket = io("http://localhost:3002"); // Match backend port
+const socket = io("https://take-it-home-8ldm.onrender.com"); // Match backend port
 
 const ChatPage = () => {
   const location = useLocation();
@@ -18,7 +18,7 @@ const ChatPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [listing, setListing] = useState(null);
 
-  const API_BASE = "http://localhost:3002";
+  const API_BASE = "https://take-it-home-8ldm.onrender.com";
 
   // Load conversations on mount
   useEffect(() => {
@@ -158,7 +158,7 @@ const ChatPage = () => {
           {listing ? (
             <div className="mt-3">
               <img
-                src={`http://localhost:3002${listing.imageUrl}`}
+                src={`https://take-it-home-8ldm.onrender.com${listing.imageUrl}`}
                 alt="Item"
                 style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }}
               />

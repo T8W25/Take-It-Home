@@ -20,7 +20,7 @@ const ProfilePhotoUpload = () => {
     const token = localStorage.getItem("jwtToken");
 
     try {
-      const res = await fetch("http://localhost:3002/api/users/upload-profile", {
+      const res = await fetch("https://take-it-home-8ldm.onrender.com/api/users/upload-profile", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
