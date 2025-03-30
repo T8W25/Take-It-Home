@@ -13,7 +13,6 @@ function Login() {
 
   const navigate = useNavigate();
 
-  // Check if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     const user = localStorage.getItem("user");
@@ -22,7 +21,7 @@ function Login() {
     }
   }, []);
 
-  // Handle Login
+  // ✅ LOGIN FUNCTION
   const handleLogin = async (event) => {
     event.preventDefault();
     setMessage(null);
@@ -45,13 +44,15 @@ function Login() {
       setIsLoggedIn(true);
       setMessage({ type: "success", text: "Login successful!" });
 
-      navigate("/post-item");
+      // ✅ Force a full reload to fix navbar state (profile image, trade/donate links)
+      navigate("/");
+      window.location.reload();
     } catch (error) {
       setMessage({ type: "danger", text: error.message });
     }
   };
 
-  // Handle Logout
+  // ✅ LOGOUT FUNCTION
   const handleLogout = async () => {
     try {
       await fetch(API_LOGOUT_URL, { method: "POST" });

@@ -1,7 +1,6 @@
 const multer = require("multer");
 const path = require("path");
 
-// ✅ Configure storage for images & videos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -11,7 +10,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// ✅ File filter: Allow only images & videos
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
     cb(null, true);
@@ -20,7 +18,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// ✅ Upload Middleware
 const upload = multer({ storage, fileFilter });
 
-module.exports = upload;
+module.exports = upload; // ✅ THIS IS CRITICAL!

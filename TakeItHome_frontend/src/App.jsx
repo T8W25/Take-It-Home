@@ -17,7 +17,7 @@ import MessageRequest from './pages/MessageRequest';
 import MessageRequestTrade from './pages/MessageRequestTrade';
 import ChatPage from './pages/ChatPage';
 import Notifications from './pages/Notifications';
-
+import Profile from './pages/Profile'; // ✅ NEW LINE
 
 function App() {
   return (
@@ -38,7 +38,8 @@ function App() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/search" element={<SearchResults />} />
-    </Routes>
+        <Route path="/profile" element={<Profile />} /> {/* ✅ NEW ROUTE */}
+      </Routes>
     </>
   );
 }

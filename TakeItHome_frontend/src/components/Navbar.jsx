@@ -1,25 +1,63 @@
-// ✅ Updated Navbar.jsx with Account Dropdown
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
-import Button from "react-bootstrap/Button";
 import SearchBar from "./SearchBar";
+import axios from "axios";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
+
+  const checkAuth = () => {
+    const token = localStorage.getItem("jwtToken");
+    setIsLoggedIn(!!token);
+
+    if (token) {
+      axios
+        .get("http://localhost:3002/api/users/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setProfileImage(res.data.profileImage);
+        })
+        .catch((err) => {
+          console.error("❌ Profile fetch error:", err);
+          setProfileImage(null);
+        });
+    } else {
+      setProfileImage(null);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     setIsLoggedIn(!!token);
-  }, []);
+  
+    if (token) {
+      axios
+        .get("http://localhost:3002/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          setProfileImage(res.data.profileImage);
+        })
+        .catch((err) => {
+          console.error("❌ Failed to fetch profile:", err.message);
+        });
+    }
+  }, [localStorage.getItem("jwtToken")]); // ✅ this line re-runs on login
+  
 
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
     setIsLoggedIn(false);
+    setProfileImage(null);
     navigate("/login");
   };
 
@@ -29,7 +67,7 @@ const NavBar = () => {
         <Navbar.Brand as={Link} to="/">
           <img
             alt="logo"
-            src="./logo.png"
+            src="/logo.png"
             width="80"
             height="60"
             style={{ borderRadius: "50%", objectFit: "cover" }}
@@ -52,7 +90,22 @@ const NavBar = () => {
           </div>
 
           <Nav className="ms-auto">
-            <NavDropdown title="Account" id="account-dropdown" align="end">
+            <NavDropdown
+              title={
+                <span>
+                  <img
+                    src={profileImage ? `http://localhost:3002${profileImage}` : "/default-profile.png"}
+                    alt="Profile"
+                    width="30"
+                    height="30"
+                    className="rounded-circle me-2"
+                  />
+                  Account
+                </span>
+              }
+              id="account-dropdown"
+              align="end"
+            >
               {!isLoggedIn ? (
                 <>
                   <NavDropdown.Item as={Link} to="/login">Login</NavDropdown.Item>
@@ -60,11 +113,13 @@ const NavBar = () => {
                 </>
               ) : (
                 <>
-                  <NavDropdown.Item as={Link} to="/chat">Messages</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/notifications">Notifications</NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
-                </>
+                <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/chat">Messages</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/notifications">Notifications</NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+              </>
+              
               )}
             </NavDropdown>
           </Nav>

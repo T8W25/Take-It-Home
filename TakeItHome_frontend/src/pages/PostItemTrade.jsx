@@ -75,7 +75,7 @@ function PostItemTrade() {
 
       if (!res.ok) throw new Error(editMode ? "Failed to update item" : "Failed to post item");
 
-      const result = await res.json();
+      // const result = await res.json();
       setMessage({ type: "success", text: editMode ? "Item updated successfully!" : "Item posted successfully!" });
       resetForm();
       fetchItems();
