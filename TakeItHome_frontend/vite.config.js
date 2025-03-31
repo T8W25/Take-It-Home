@@ -7,4 +7,7 @@ export default defineConfig({
     port: 5173, // Force Vite to use port 5173
     strictPort: true, // Prevent it from switching ports
   },
+  css: {
+    devSourcemap: false, // Disable CSS source maps to avoid Bootstrap errors
+  },
 });
