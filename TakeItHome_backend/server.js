@@ -18,7 +18,7 @@ const frontendUrl = process.env.NODE_ENV === 'production' ? 'https://take-it-hom
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: frontendUrl,
+    origin: frontendUrl,  // ✅ Dynamically set based on environment
     methods: ["GET", "POST"]
   }
 });
@@ -42,7 +42,7 @@ if (!process.env.MONGO_URI) {
 
 // ✅ Middlewares
 app.use(cors({
-  origin: frontendUrl,
+  origin: frontendUrl,  // ✅ Dynamically set based on environment
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
   allowedHeaders: "Content-Type,Authorization"
