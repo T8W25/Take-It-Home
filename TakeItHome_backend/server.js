@@ -11,11 +11,14 @@ const { Server } = require("socket.io");
 const app = express(); // ✅ Moved before usage
 const PORT = process.env.PORT || 3000;
 
+// ✅ Determine the front-end URL based on the environment
+const frontendUrl = process.env.NODE_ENV === 'production' ? 'https://take-it-home-1.onrender.com' : 'http://localhost:5173';
+
 // ✅ Create server & socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: frontendUrl,
     methods: ["GET", "POST"]
   }
 });
@@ -39,7 +42,7 @@ if (!process.env.MONGO_URI) {
 
 // ✅ Middlewares
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: frontendUrl,
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
   allowedHeaders: "Content-Type,Authorization"
