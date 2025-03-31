@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Card, Spinner, Alert, Tabs, Tab, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || "https://take-it-home-8ldm.onrender.com";
 
 const Notifications = () => {
   const [requests, setRequests] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
@@ -55,25 +55,37 @@ const Notifications = () => {
     fetchNotifications();
   }, []);
 
-  const handleAction = async (id, action) => {
-    const token = localStorage.getItem("jwtToken");
+  const handleAction = async (requestId, action) => {
     try {
-      const res = await fetch(`${API_BASE}/api/requests/${id}/${action}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const result = await res.json();
-      if (res.ok) {
+      setLoading(true);
+      const res = await axios.put(
+        `${API_BASE}/api/requests/${requestId}/${action}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`
+          }
+        }
+      );
+      if (res.status === 200) {
+        // Refresh requests
         setRequests(prev =>
-          prev.map(r => (r._id === id ? result.request : r))
+          prev.map(req => 
+            req._id === requestId ? { ...req, status: action } : req
+          )
         );
-      } else {
-        alert(result.message || "Failed to update request.");
       }
     } catch (err) {
-      alert(err.message || "Request error");
+      setError(err.message || "Failed to update request");
+    } finally {
+      setLoading(false);
     }
   };
+
+  const pendingRequests = requests.filter(r => r.status === "pending");
+  const acceptedRequests = requests.filter(r => r.status === "accepted");
+  const declinedRequests = requests.filter(r => r.status === "declined");
+
 
   const handleCancel = async (id) => {
     const token = localStorage.getItem("jwtToken");
@@ -103,47 +115,63 @@ const Notifications = () => {
     });
   };
 
-  const renderRequestList = (list) =>
-    list.map((req) => {
-      const isSender = req.senderId?._id === userId || req.senderId === userId;
-      const isReceiver = req.receiverId?._id === userId || req.receiverId === userId;
+  const renderRequestList = (list) => {
+  return list.map((req) => {
+    const isReceiver = req.receiverId === userId; // Simplified check
+    console.log("Rendering request:", req._id, "isReceiver:", isReceiver, "status:", req.status);
 
-      return (
-        <Card key={req._id} className="mb-3">
-  <Card.Body>
-    <Card.Title>{req.itemId?.title || ""} ({req.itemType === "trade" ? "Trade Item" : "Donation Item"})</Card.Title>
-    <Card.Text>
-      <strong>From:</strong> {req.senderId?.username || "Unknown"}<br />
-      <strong>Message:</strong> {req.message}<br />
-      <strong>Status:</strong>{" "}
-      <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
-        {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-      </span>
-    </Card.Text>
+    return (
+      <Card key={req._id} className="mb-3">
+        <Card.Body>
+          <Card.Title>
+            {req.itemId?.title || "Item"} ({req.itemType === "trade" ? "Trade" : "Donation"})
+          </Card.Title>
+          <Card.Text>
+            <strong>From:</strong> {req.senderId?.username || "Unknown"}<br />
+            <strong>Message:</strong> {req.message}<br />
+            <strong>Status:</strong>{" "}
+            <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
+              {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+            </span>
+          </Card.Text>
 
-    {isReceiver && req.status === "pending" && (
-      <>
-        <Button size="sm" variant="success" className="me-2" onClick={() => handleAction(req._id, "accept")}>Accept</Button>
-        <Button size="sm" variant="danger" onClick={() => handleAction(req._id, "decline")}>Decline</Button>
-      </>
-    )}
+          {/* Accept/Decline Buttons */}
+            <div className="d-flex justify-content-end mt-2">
+              <Button 
+                variant="success" 
+                size="sm" 
+                onClick={() => handleAction(req._id, "accept")}
+              >
+                Accept
+              </Button>
+              <Button 
+                variant="danger" 
+                size="sm" 
+                className="ms-2"
+                onClick={() => handleAction(req._id, "decline")}
+              >
+                Decline
+              </Button>
+            </div>
+          
 
-    {isSender && req.status === "pending" && (
-      <Button size="sm" variant="warning" onClick={() => handleCancel(req._id)}>Cancel</Button>
-    )}
+          {/* Chat Button */}
+          {req.status === "accepted" && (
+            <Button 
+              variant="primary" 
+              size="sm" 
+              className="mt-2"
+              onClick={() => navigateToChat(req)}
+            >
+              Chat
+            </Button>
+          )}
+        </Card.Body>
+      </Card>
+    );
+  });
+};
 
-    {req.status === "accepted" && (
-      <Button size="sm" variant="primary" className="mt-2" onClick={() => navigateToChat(req)}>Chat</Button>
-    )}
-  </Card.Body>
-</Card>
-
-      );
-    });
-
-  const pendingRequests = requests.filter(r => r.status === "pending");
-  const acceptedRequests = requests.filter(r => r.status === "accepted");
-  const declinedRequests = requests.filter(r => r.status === "declined");
 
   return (
     <Container className="mt-5">

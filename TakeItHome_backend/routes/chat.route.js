@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Message = require('../models/Message.model');
+const {getChatHistory, getConversations} = require('../controllers/chat.controller');
 
 // ✅ Get chat history for a listing between two users
 router.get('/history/:itemId/:user1/:user2', async (req, res) => {

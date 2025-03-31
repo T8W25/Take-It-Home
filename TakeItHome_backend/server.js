@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-
+const {createMessage} = require("./controllers/chat.controller");
 const app = express(); // ✅ Moved before usage
 const PORT = process.env.PORT || 3000;
 
@@ -81,6 +81,8 @@ io.on("connection", (socket) => {
     try {
       const newMessage = new Message(data);
       await newMessage.save();
+      const savedMessage = await Message.findById(newMessage._id).populate("senderId").populate("receiverId");
+      io.emit("receive_message", savedMessage);
     } catch (err) {
       console.error("❌ Message save error:", err.message);
     }
