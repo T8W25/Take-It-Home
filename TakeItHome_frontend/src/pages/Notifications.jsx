@@ -105,16 +105,15 @@ const Notifications = () => {
     }
   };
 
-  const navigateToChat = (data) => {
-    navigate("/chat", {
-      state: {
-        itemId: data.itemId?._id || data.itemId,
-        receiverId: data.senderId?._id || data.senderId || data.from,
-        requestId: data._id
-      }
-    });
-  };
-
+const navigateToChat = (request) => {
+  navigate("/chat", {
+    state: {
+      itemId: request.itemId._id, // Ensure this is a string
+      receiverId: request.senderId._id, // Ensure this is a string
+      username: request.senderId.username
+    }
+  });
+};
   const renderRequestList = (list) => {
   return list.map((req) => {
     const isReceiver = req.receiverId === userId; // Simplified check
@@ -133,7 +132,6 @@ const Notifications = () => {
             <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
               {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
             </span>
-          </Card.Text>
 
           {/* Accept/Decline Buttons */}
             <div className="d-flex justify-content-end mt-2">
@@ -141,7 +139,7 @@ const Notifications = () => {
                 variant="success" 
                 size="sm" 
                 onClick={() => handleAction(req._id, "accept")}
-              >
+                >
                 Accept
               </Button>
               <Button 
@@ -149,10 +147,11 @@ const Notifications = () => {
                 size="sm" 
                 className="ms-2"
                 onClick={() => handleAction(req._id, "decline")}
-              >
+                >
                 Decline
               </Button>
             </div>
+                </Card.Text>
           
 
           {/* Chat Button */}

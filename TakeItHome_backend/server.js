@@ -73,26 +73,18 @@ app.get("/", (req, res) => {
 });
 
 // ✅ Socket.IO Events
+// server.js
 io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
-
   socket.on("send_message", async (data) => {
-    console.log("📨 Message received:", data);
     try {
-      const newMessage = new Message(data);
-      await newMessage.save();
-      const savedMessage = await Message.findById(newMessage._id).populate("senderId").populate("receiverId");
-      io.emit("receive_message", savedMessage);
+      const savedMessage = await createMessage(data); // Use the controller function
+      io.emit("receive_message", savedMessage); // Emit the populated message
     } catch (err) {
-      console.error("❌ Message save error:", err.message);
+      console.error("Message save error:", err.message);
     }
-    io.emit("receive_message", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("🔴 User disconnected:", socket.id);
   });
 });
+
 
 // ✅ Start server
 server.listen(PORT, () => {
