@@ -1,165 +1,59 @@
-// ChatPage.jsx
-import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
-import io from 'socket.io-client';
-import { useLocation } from 'react-router-dom';
+const express = require('express');
+const router = express.Router();
+const Message = require('../models/Message.model');
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
-const socket = io(API_BASE);
+// ✅ Get chat history for a listing between two users
+router.get('/history/:itemId/:user1/:user2', async (req, res) => {
+  const { itemId, user1, user2 } = req.params;
 
-const ChatPage = () => {
-  const location = useLocation();
-  const { itemId, receiverId } = location.state || {}; // Get from state
-  const [chatLog, setChatLog] = useState([]);
-  const [message, setMessage] = useState("");
-  const [conversations, setConversations] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [error, setError] = useState("");
-  const user = JSON.parse(localStorage.getItem("user"));
-  const loggedInUserId = user?._id;
+  try {
+    const messages = await Message.find({
+      itemId,
+      $or: [
+        { senderId: user1, receiverId: user2 },
+        { senderId: user2, receiverId: user1 }
+      ]
+    }).sort('createdAt');
 
-  // Fetch conversations on mount
-  useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/chat/conversations/${loggedInUserId}`);
-        const data = await res.json();
-        setConversations(data);
-        
-        // Auto-select chat if itemId and receiverId are provided
-        if (itemId && receiverId) {
-          const selected = data.find(
-            conv => conv.itemId === itemId && conv.userId === receiverId
-          );
-          if (selected) setSelectedChat(selected);
-        }
-      } catch (err) {
-        setError("Failed to load conversations");
-        console.error(err);
-      }
-    };
-    fetchConversations();
-  }, [loggedInUserId, itemId, receiverId]);
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch messages' });
+  }
+});
 
-  // Fetch chat history when selectedChat changes
-  useEffect(() => {
-    if (!selectedChat) return;
+// ✅ Get all conversations for a user
+router.get('/conversations/:userId', async (req, res) => {
+  const userId = req.params.userId;
 
-    const fetchChatHistory = async () => {
-      try {
-        const res = await fetch(
-          `${API_BASE}/api/chat/history/${selectedChat.itemId}/${loggedInUserId}/${selectedChat.userId}`
-        );
-        const data = await res.json();
-        setChatLog(data);
-      } catch (err) {
-        setError("Failed to load chat history");
-        console.error(err);
-      }
-    };
-    fetchChatHistory();
-  }, [selectedChat]);
+  try {
+    const messages = await Message.find({
+      $or: [
+        { senderId: userId },
+        { receiverId: userId }
+      ]
+    });
 
-  // Listen for incoming messages
-  useEffect(() => {
-    socket.on("receive_message", (newMessage) => {
-      if (
-        selectedChat &&
-        newMessage.itemId === selectedChat.itemId &&
-        (newMessage.senderId === selectedChat.userId || newMessage.receiverId === selectedChat.userId)
-      ) {
-        setChatLog((prev) => [...prev, newMessage]);
+    // Group by userId + itemId combo
+    const uniqueConversations = {};
+
+    messages.forEach(msg => {
+      const otherUser = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      const key = `${otherUser}-${msg.itemId}`;
+
+      if (!uniqueConversations[key]) {
+        uniqueConversations[key] = {
+          userId: otherUser,
+          itemId: msg.itemId,
+          lastMessage: msg.content,
+          timestamp: msg.createdAt
+        };
       }
     });
-    return () => socket.off("receive_message");
-  }, [selectedChat]);
 
-  const handleSelectChat = (conv) => {
-    setSelectedChat(conv);
-  };
+    res.json(Object.values(uniqueConversations));
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch conversations' });
+  }
+});
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!message.trim() || !selectedChat) return;
-
-    const newMessage = {
-      senderId: loggedInUserId,
-      receiverId: selectedChat.userId,
-      content: message,
-      itemId: selectedChat.itemId,
-    };
-
-    try {
-      socket.emit("send_message", newMessage);
-      setChatLog([...chatLog, newMessage]);
-      setMessage("");
-    } catch (err) {
-      setError("Failed to send message");
-      console.error(err);
-    }
-  };
-
-  return (
-    <Container fluid className="mt-4">
-      <Row>
-        {/* Left Sidebar: Conversations */}
-        <Col md={3} style={{ borderRight: '1px solid #ddd', height: '80vh', overflowY: 'auto' }}>
-          <h5>Chats</h5>
-          {conversations.length === 0 ? (
-            <Alert variant="info">No conversations yet</Alert>
-          ) : (
-            conversations.map((conv, index) => (
-              <div
-                key={index}
-                onClick={() => handleSelectChat(conv)}
-                style={{
-                  padding: '10px',
-                  backgroundColor: selectedChat?.itemId === conv.itemId && selectedChat?.userId === conv.userId ? '#f0f0f0' : 'transparent',
-                  cursor: 'pointer'
-                }}
-              >
-                <div><strong>User:</strong> {conv.userId}</div>
-                <div style={{ fontSize: '0.8em', color: '#888' }}>{conv.lastMessage}</div>
-              </div>
-            ))
-          )}
-        </Col>
-
-        {/* Right Panel: Chat */}
-        <Col md={9}>
-          {error && <Alert variant="danger">{error}</Alert>}
-          {selectedChat ? (
-            <>
-              <h5>Chat with {selectedChat.userId}</h5>
-              <div style={{ height: '60vh', overflowY: 'auto', border: '1px solid #ccc', padding: 10 }}>
-                {chatLog.map((msg, i) => (
-                  <div key={i} className="mb-2">
-                    <strong>{msg.senderId === loggedInUserId ? "You" : "Them"}:</strong> {msg.content}
-                    <small className="d-block text-muted">
-                      {new Date(msg.createdAt).toLocaleTimeString()}
-                    </small>
-                  </div>
-                ))}
-              </div>
-              <Form onSubmit={handleSend} className="mt-3">
-                <Form.Control
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type a message..."
-                />
-                <Button type="submit" variant="primary" className="mt-2">
-                  Send
-                </Button>
-              </Form>
-            </>
-          ) : (
-            <p className="text-center mt-5">Select a conversation to start chatting</p>
-          )}
-        </Col>
-      </Row>
-    </Container>
-  );
-};
-
-export default ChatPage;
+module.exports = router;
