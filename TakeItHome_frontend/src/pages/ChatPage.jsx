@@ -1,26 +1,25 @@
+
+// ChatPage.jsx
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import io from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
 
-const socket = io("http://localhost:3002"); // Match backend port
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://take-it-home-8ldm.onrender.com";
+const socket = io(API_BASE);
 
 const ChatPage = () => {
   const location = useLocation();
-  const passedState = location.state;
-
+  const { itemId, receiverId } = location.state || {};
+  const [chatLog, setChatLog] = useState([]);
+  const [message, setMessage] = useState("");
+  const [conversations, setConversations] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [error, setError] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
   const loggedInUserId = user?._id;
 
-  const [message, setMessage] = useState('');
-  const [chatLog, setChatLog] = useState([]);
-  const [conversations, setConversations] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [listing, setListing] = useState(null);
-
-  const API_BASE = "http://localhost:3002";
-
-  // Load conversations on mount
+  // Fetch conversations on mount
   useEffect(() => {
     const fetchConversations = async () => {
       try {
@@ -28,56 +27,56 @@ const ChatPage = () => {
         const data = await res.json();
         setConversations(data);
 
-        // Auto-select conversation if redirected from Notification
-        if (passedState?.itemId && passedState?.receiverId) {
-          const selected = {
-            itemId: passedState.itemId,
-            userId: passedState.receiverId
-          };
-          handleSelectChat(selected);
+        // Auto-select chat if parameters exist
+        if (itemId && receiverId) {
+          const selected = data.find(
+            conv => conv.itemId === itemId && conv.userId === receiverId
+          );
+          if (selected) setSelectedChat(selected);
         }
       } catch (err) {
-        console.error("Error loading conversations:", err);
+        setError("Failed to load conversations");
+        console.error(err);
       }
     };
-
     fetchConversations();
-  }, [loggedInUserId, passedState]);
+  }, [loggedInUserId, itemId, receiverId]);
 
-  // Listen for incoming socket messages
+  // Fetch chat history when selectedChat changes
   useEffect(() => {
-    socket.on('receive_message', (data) => {
-      if (
-        selectedChat &&
-        data.senderId &&
-        (data.senderId === selectedChat.userId || data.receiverId === selectedChat.userId)
-      ) {
-        setChatLog((prev) => [...prev, data]);
-      }
-    });
+    if (!selectedChat) return;
 
-    return () => {
-      socket.off('receive_message');
+    const fetchChatHistory = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/chat/history/${selectedChat.itemId}/${loggedInUserId}/${selectedChat.userId}`
+        );
+        const data = await res.json();
+        setChatLog(data);
+      } catch (err) {
+        setError("Failed to load chat history");
+        console.error(err);
+      }
     };
+    fetchChatHistory();
   }, [selectedChat]);
 
-  const handleSelectChat = async (conv) => {
+  // Listen for incoming messages
+  useEffect(() => {
+    socket.on("receive_message", (newMessage) => {
+      if (
+        selectedChat &&
+        newMessage.itemId === selectedChat.itemId &&
+        (newMessage.senderId === selectedChat.userId || newMessage.receiverId === selectedChat.userId)
+      ) {
+        setChatLog(prev => [...prev, newMessage]);
+      }
+    });
+    return () => socket.off("receive_message");
+  }, [selectedChat]);
+
+  const handleSelectChat = (conv) => {
     setSelectedChat(conv);
-    setChatLog([]);
-
-    try {
-      // Fetch chat history
-      const res = await fetch(`${API_BASE}/api/chat/history/${conv.itemId}/${loggedInUserId}/${conv.userId}`);
-      const data = await res.json();
-      setChatLog(data);
-
-      // Fetch item listing info
-      const listingRes = await fetch(`${API_BASE}/api/donation-items/${conv.itemId}`);
-      const listingData = await listingRes.json();
-      setListing(listingData);
-    } catch (err) {
-      console.error("Error loading chat or listing:", err);
-    }
   };
 
   const handleSend = (e) => {
@@ -93,8 +92,8 @@ const ChatPage = () => {
     };
 
     socket.emit("send_message", newMessage);
-    setChatLog((prev) => [...prev, newMessage]);
-    setMessage('');
+    setChatLog(prev => [...prev, newMessage]); // Update state immediately
+    setMessage("");
   };
 
   return (
@@ -102,38 +101,40 @@ const ChatPage = () => {
       <Row>
         {/* Left Sidebar: Conversations */}
         <Col md={3} style={{ borderRight: '1px solid #ddd', height: '80vh', overflowY: 'auto' }}>
-          <h5>Messages</h5>
-          {conversations.map((conv, index) => (
-            <div
-              key={index}
-              onClick={() => handleSelectChat(conv)}
-              style={{
-                padding: '10px',
-                backgroundColor:
-                  selectedChat?.userId === conv.userId && selectedChat?.itemId === conv.itemId
-                    ? '#f0f0f0'
-                    : 'transparent',
-                cursor: 'pointer'
-              }}
-            >
-              <div><strong>With:</strong> {conv.userId}</div>
-              <div style={{ fontSize: '0.8em', color: '#888' }}>{conv.lastMessage}</div>
-            </div>
-          ))}
+          <h5>Chats</h5>
+          {conversations.length === 0 ? (
+            <Alert variant="info">No conversations yet</Alert>
+          ) : (
+            conversations.map((conv, index) => (
+              <div
+                key={index}
+                onClick={() => handleSelectChat(conv)}
+                style={{
+                  padding: '10px',
+                  backgroundColor: selectedChat?.itemId === conv.itemId && selectedChat?.userId === conv.userId ? '#f0f0f0' : 'transparent',
+                  cursor: 'pointer'
+                }}
+              >
+                <div><strong>{conv.username}</strong></div>
+                <div style={{ fontSize: '0.8em', color: '#888' }}>{conv.lastMessage}</div>
+              </div>
+            ))
+          )}
         </Col>
 
-        {/* Center: Chat Panel */}
-        <Col md={6}>
+        {/* Right Panel: Chat */}
+        <Col md={9}>
+          {error && <Alert variant="danger">{error}</Alert>}
           {selectedChat ? (
             <>
-              <h5 className="mb-3">Chat with {selectedChat.userId}</h5>
-              <div style={{ height: '60vh', overflowY: 'scroll', border: '1px solid #ccc', padding: 10 }}>
+              <h5>Chat with {selectedChat.username}</h5>
+              <div style={{ height: '60vh', overflowY: 'auto', border: '1px solid #ccc', padding: 10 }}>
                 {chatLog.map((msg, i) => (
-                  <div key={i} style={{ marginBottom: '10px' }}>
-                    <strong>{msg.senderId === loggedInUserId ? 'You' : msg.senderId}</strong>: {msg.content}
-                    <div style={{ fontSize: '0.8em', color: '#999' }}>
-                      {new Date(msg.createdAt).toLocaleString()}
-                    </div>
+                  <div key={i} className="mb-2">
+                    <strong>{msg.senderId.username}:</strong> {msg.content}
+                    <small className="d-block text-muted">
+                      {new Date(msg.createdAt).toLocaleTimeString()}
+                    </small>
                   </div>
                 ))}
               </div>
@@ -144,31 +145,13 @@ const ChatPage = () => {
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type a message..."
                 />
-                <Button type="submit" className="mt-2">Send</Button>
+                <Button type="submit" variant="primary" className="mt-2">
+                  Send
+                </Button>
               </Form>
             </>
           ) : (
-            <p className="text-muted mt-5">Select a conversation to begin</p>
-          )}
-        </Col>
-
-        {/* Right Sidebar: Listing Info */}
-        <Col md={3} style={{ borderLeft: '1px solid #ddd' }}>
-          <h5>Listing Info</h5>
-          {listing ? (
-            <div className="mt-3">
-              <img
-                src={`http://localhost:3002${listing.imageUrl}`}
-                alt="Item"
-                style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }}
-              />
-              <div><strong>Title:</strong> {listing.title}</div>
-              <div><strong>Category:</strong> {listing.category}</div>
-              <div><strong>Condition:</strong> {listing.condition}</div>
-              <div><strong>Location:</strong> {listing.location}</div>
-            </div>
-          ) : (
-            <p className="text-muted">No item selected</p>
+            <p className="text-center mt-5">Select a conversation to start chatting</p>
           )}
         </Col>
       </Row>

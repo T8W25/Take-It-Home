@@ -1,4 +1,3 @@
-// ✅ Updated server.js with user routes
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -11,11 +10,14 @@ const { Server } = require("socket.io");
 const app = express(); // ✅ Moved before usage
 const PORT = process.env.PORT || 3000;
 
+// ✅ Determine the front-end URL based on the environment
+const frontendUrl = process.env.NODE_ENV === 'production' ? 'https://take-it-home-1.onrender.com' : 'http://localhost:5173';
+
 // ✅ Create server & socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: frontendUrl,  // ✅ Dynamically set based on environment
     methods: ["GET", "POST"]
   }
 });
@@ -28,6 +30,7 @@ const searchRoutes = require("./routes/search.route.js");
 const chatRoutes = require("./routes/chat.route.js");
 const itemRequestRoutes = require("./routes/ItemRequest.route.js");
 const userRoutes = require("./routes/user.route.js"); // ✅ only once
+const reportRoutes = require("./routes/report.route.js"); // ✅ Added report routes
 
 const Message = require("./models/Message.model");
 
@@ -39,7 +42,7 @@ if (!process.env.MONGO_URI) {
 
 // ✅ Middlewares
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: frontendUrl,  // ✅ Dynamically set based on environment
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
   allowedHeaders: "Content-Type,Authorization"
@@ -64,6 +67,7 @@ app.use("/api/search", searchRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/requests", itemRequestRoutes);
 app.use("/api/users", userRoutes); // ✅ FIXED
+app.use("/api/reports", reportRoutes); // ✅ Mounted the report routes
 
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
@@ -71,22 +75,18 @@ app.get("/", (req, res) => {
 
 // ✅ Socket.IO Events
 io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
+  console.log("User connected:", socket.id);
 
   socket.on("send_message", async (data) => {
-    console.log("📨 Message received:", data);
     try {
-      const newMessage = new Message(data);
-      await newMessage.save();
+      const savedMessage = await createMessage(data); // Use the controller function
+      io.emit("receive_message", savedMessage); // Emit the populated message
     } catch (err) {
-      console.error("❌ Message save error:", err.message);
+      console.error("Message save error:", err.message);
     }
-    io.emit("receive_message", data);
   });
 
-  socket.on("disconnect", () => {
-    console.log("🔴 User disconnected:", socket.id);
-  });
+  // Optionally, you can handle other socket events related to reports or trade messaging
 });
 
 // ✅ Start server

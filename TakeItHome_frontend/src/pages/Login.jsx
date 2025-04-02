@@ -8,8 +8,8 @@ function Login() {
   const [message, setMessage] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const API_LOGIN_URL = "http://localhost:3002/api/auth/login";
-  const API_LOGOUT_URL = "http://localhost:3002/api/auth/logout";
+  const API_LOGIN_URL = "https://take-it-home-8ldm.onrender.com/api/auth/login";
+  const API_LOGOUT_URL = "https://take-it-home-8ldm.onrender.com/api/auth/logout";
 
   const navigate = useNavigate();
 

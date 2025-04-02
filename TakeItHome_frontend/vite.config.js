@@ -4,7 +4,23 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173, // Force Vite to use port 5173
-    strictPort: true, // Prevent it from switching ports
+    port: 5173,
+    strictPort: true,
   },
+  css: {
+    postcss: {
+      plugins: [
+        {
+          postcssPlugin: 'remove-bootstrap-source-map',
+          Once (root) {
+            root.walkComments(comment => {
+              if (comment.text.includes('sourceMappingURL=bootstrap.min.css.map')) {
+                comment.remove();
+              }
+            });
+          }
+        }
+      ]
+    }
+  }
 });
