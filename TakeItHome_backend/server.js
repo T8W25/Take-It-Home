@@ -1,4 +1,3 @@
-// ✅ Updated server.js with user routes
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -7,7 +6,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-const {createMessage} = require("./controllers/chat.controller");
+
 const app = express(); // ✅ Moved before usage
 const PORT = process.env.PORT || 3000;
 
@@ -31,6 +30,7 @@ const searchRoutes = require("./routes/search.route.js");
 const chatRoutes = require("./routes/chat.route.js");
 const itemRequestRoutes = require("./routes/ItemRequest.route.js");
 const userRoutes = require("./routes/user.route.js"); // ✅ only once
+const reportRoutes = require("./routes/report.route.js"); // ✅ Added report routes
 
 const Message = require("./models/Message.model");
 
@@ -67,14 +67,16 @@ app.use("/api/search", searchRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/requests", itemRequestRoutes);
 app.use("/api/users", userRoutes); // ✅ FIXED
+app.use("/api/reports", reportRoutes); // ✅ Mounted the report routes
 
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
 });
 
 // ✅ Socket.IO Events
-// server.js
 io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
   socket.on("send_message", async (data) => {
     try {
       const savedMessage = await createMessage(data); // Use the controller function
@@ -83,8 +85,9 @@ io.on("connection", (socket) => {
       console.error("Message save error:", err.message);
     }
   });
-});
 
+  // Optionally, you can handle other socket events related to reports or trade messaging
+});
 
 // ✅ Start server
 server.listen(PORT, () => {
