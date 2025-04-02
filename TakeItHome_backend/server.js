@@ -49,6 +49,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For parsing URL-encoded form data
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ MongoDB connection
@@ -60,7 +61,7 @@ mongoose.connect(process.env.MONGO_URI)
   });
 
 // ✅ Mount Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); // ✅ Includes password recovery routes
 app.use("/api/trade-items", tradeItemRoutes);
 app.use("/api/donation-items", donationItemRoutes);
 app.use("/api/search", searchRoutes);
@@ -98,4 +99,10 @@ server.listen(PORT, () => {
 process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Rejection:", err.message);
   server.close(() => process.exit(1));
+});
+
+// Debug middleware execution
+app.use((req, res, next) => {
+  console.log("Middleware executed. Request Body:", req.body);
+  next();
 });
