@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Card, Spinner, Alert, Tabs, Tab, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Container, Card, Spinner, Alert, Tabs, Tab, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3002";
 
 const Notifications = () => {
   const [requests, setRequests] = useState([]);
-  const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?._id;
+  const token = localStorage.getItem("jwtToken");
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      const token = localStorage.getItem("jwtToken");
+    const fetchRequests = async () => {
       if (!token) {
         setError("Not authenticated.");
         setLoading(false);
@@ -24,178 +24,126 @@ const Notifications = () => {
 
       try {
         const res = await fetch(`${API_BASE}/api/requests/received`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         });
 
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text);
-        }
+        if (!res.ok) throw new Error("Failed to fetch requests.");
 
         const data = await res.json();
         setRequests(data);
-
-        setMessages([
-          {
-            _id: "msg1",
-            from: "Amina",
-            content: "Thanks for accepting my request!",
-            createdAt: new Date().toISOString(),
-            itemId: data[0]?.itemId, // Optional: attach a real itemId to demo message
-            senderId: data[0]?.senderId?._id // Optional fallback
-          }
-        ]);
       } catch (err) {
-        setError(err.message || "Failed to load notifications");
+        setError(err.message || "An error occurred.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNotifications();
-  }, []);
+    fetchRequests();
+  }, [token]);
 
   const handleAction = async (id, action) => {
-    const token = localStorage.getItem("jwtToken");
     try {
       const res = await fetch(`${API_BASE}/api/requests/${id}/${action}`, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
-      const result = await res.json();
-      if (res.ok) {
-        setRequests(prev =>
-          prev.map(r => (r._id === id ? result.request : r))
-        );
-      } else {
-        alert(result.message || "Failed to update request.");
-      }
+
+      if (!res.ok) throw new Error("Action failed");
+
+      const data = await res.json();
+
+      setRequests((prev) =>
+        prev.map((req) => (req._id === id ? { ...req, status: action } : req))
+      );
     } catch (err) {
-      alert(err.message || "Request error");
+      alert(err.message || "Error updating request.");
     }
   };
 
-  const handleCancel = async (id) => {
-    const token = localStorage.getItem("jwtToken");
-    try {
-      const res = await fetch(`${API_BASE}/api/requests/${id}/cancel`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setRequests(prev => prev.filter(r => r._id !== id));
-      } else {
-        const result = await res.json();
-        alert(result.message || "Failed to cancel request.");
-      }
-    } catch (err) {
-      alert(err.message || "Cancel error");
-    }
-  };
-
-  const navigateToChat = (data) => {
+  const navigateToChat = (req) => {
     navigate("/chat", {
       state: {
-        itemId: data.itemId?._id || data.itemId,
-        receiverId: data.senderId?._id || data.senderId || data.from,
-        requestId: data._id
+        itemId: req.itemId._id,
+        receiverId: req.senderId._id,
+        username: req.senderId.username
       }
     });
   };
 
-  const renderRequestList = (list) =>
-    list.map((req) => {
-      const isSender = req.senderId?._id === userId || req.senderId === userId;
-      const isReceiver = req.receiverId?._id === userId || req.receiverId === userId;
+  const renderRequestList = (list) => {
+    return list.map((req) => {
+      const isReceiver = req.receiverId === userId || req.receiverId?._id === userId;
 
       return (
         <Card key={req._id} className="mb-3">
-  <Card.Body>
-    <Card.Title>{req.itemId?.title || ""} ({req.itemType === "trade" ? "Trade Item" : "Donation Item"})</Card.Title>
-    <Card.Text>
-      <strong>From:</strong> {req.senderId?.username || "Unknown"}<br />
-      <strong>Message:</strong> {req.message}<br />
-      <strong>Status:</strong>{" "}
-      <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
-        {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-      </span>
-    </Card.Text>
+          <Card.Body>
+            <Card.Title>{req.itemId?.title || "Item"} ({req.itemType})</Card.Title>
+            <Card.Text>
+              <strong>From:</strong> {req.senderId?.username || "Unknown"}<br />
+              <strong>Message:</strong> {req.message}<br />
+              <strong>Status:</strong>{" "}
+              <span className={`badge bg-${req.status === "pending" ? "warning" : req.status === "accepted" ? "success" : "danger"}`}>
+                {req.status}
+              </span>
+            </Card.Text>
 
-    {isReceiver && req.status === "pending" && (
-      <>
-        <Button size="sm" variant="success" className="me-2" onClick={() => handleAction(req._id, "accept")}>Accept</Button>
-        <Button size="sm" variant="danger" onClick={() => handleAction(req._id, "decline")}>Decline</Button>
-      </>
-    )}
+            {isReceiver && req.status === "pending" && (
+              <div className="d-flex gap-2">
+                <Button size="sm" variant="success" onClick={() => handleAction(req._id, "accept")}>
+                  Accept
+                </Button>
+                <Button size="sm" variant="danger" onClick={() => handleAction(req._id, "decline")}>
+                  Decline
+                </Button>
+              </div>
+            )}
 
-    {isSender && req.status === "pending" && (
-      <Button size="sm" variant="warning" onClick={() => handleCancel(req._id)}>Cancel</Button>
-    )}
-
-    {req.status === "accepted" && (
-      <Button size="sm" variant="primary" className="mt-2" onClick={() => navigateToChat(req)}>Chat</Button>
-    )}
-  </Card.Body>
-</Card>
-
+            {req.status === "accepted" && (
+              <Button size="sm" variant="primary" className="mt-2" onClick={() => navigateToChat(req)}>
+                Chat
+              </Button>
+            )}
+          </Card.Body>
+        </Card>
       );
     });
+  };
 
-  const pendingRequests = requests.filter(r => r.status === "pending");
-  const acceptedRequests = requests.filter(r => r.status === "accepted");
-  const declinedRequests = requests.filter(r => r.status === "declined");
+  const pending = requests.filter((r) => r.status === "pending");
+  const accepted = requests.filter((r) => r.status === "accepted");
+  const declined = requests.filter((r) => r.status === "declined");
 
   return (
     <Container className="mt-5">
-      <h3 className="mb-4">Notifications</h3>
-
+      <h3>Notifications</h3>
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
 
       {!loading && (
         <Tabs defaultActiveKey="pending" className="mb-3">
-          <Tab eventKey="pending" title={`Pending (${pendingRequests.length})`}>
-            {pendingRequests.length === 0 ? (
+          <Tab eventKey="pending" title={`Pending (${pending.length})`}>
+            {pending.length === 0 ? (
               <Alert variant="info">No pending requests.</Alert>
             ) : (
-              renderRequestList(pendingRequests)
+              renderRequestList(pending)
             )}
           </Tab>
-
-          <Tab eventKey="accepted" title={`Accepted (${acceptedRequests.length})`}>
-            {acceptedRequests.length === 0 ? (
+          <Tab eventKey="accepted" title={`Accepted (${accepted.length})`}>
+            {accepted.length === 0 ? (
               <Alert variant="info">No accepted requests.</Alert>
             ) : (
-              renderRequestList(acceptedRequests)
+              renderRequestList(accepted)
             )}
           </Tab>
-
-          <Tab eventKey="declined" title={`Declined (${declinedRequests.length})`}>
-            {declinedRequests.length === 0 ? (
+          <Tab eventKey="declined" title={`Declined (${declined.length})`}>
+            {declined.length === 0 ? (
               <Alert variant="info">No declined requests.</Alert>
             ) : (
-              renderRequestList(declinedRequests)
-            )}
-          </Tab>
-
-          <Tab eventKey="messages" title={`Messages (${messages.length})`}>
-            {messages.length === 0 ? (
-              <Alert variant="info">No messages yet.</Alert>
-            ) : (
-              messages.map((msg) => (
-                <Card
-                  key={msg._id}
-                  className="mb-3"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigateToChat(msg)}
-                >
-                  <Card.Body>
-                    <Card.Title>From: {msg.from}</Card.Title>
-                    <Card.Text>{msg.content}</Card.Text>
-                    <small className="text-muted">{new Date(msg.createdAt).toLocaleString()}</small>
-                  </Card.Body>
-                </Card>
-              ))
+              renderRequestList(declined)
             )}
           </Tab>
         </Tabs>
