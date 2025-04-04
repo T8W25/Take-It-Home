@@ -205,13 +205,25 @@ function PostItemTrade() {
                 </Card.Body>
               </Card>
             </Link>
-            <div className="mt-2 d-flex justify-content-between">
-              <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>
-              <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
-              <Link to={`/report/${item._id}`}>
-                <Button variant="danger">Report</Button>
-              </Link>
-            </div>
+            <div className="mt-2 d-flex justify-content-between align-items-center">
+  {/* Edit Button */}
+  <Button variant="warning" onClick={() => handleEditClick(item)} className="me-2 w-100 w-sm-auto">
+    Edit
+  </Button>
+  
+  {/* Delete Button */}
+  <Button variant="danger" onClick={() => handleDeleteClick(item._id)} className="me-2 w-100 w-sm-auto">
+    Delete
+  </Button>
+
+  {/* Report Button */}
+  <Link to={`/report/${item._id}`} style={{ textDecoration: 'none' }}>
+    <Button variant="info" className="w-100 w-sm-auto">
+      Report
+    </Button>
+  </Link>
+</div>
+
           </Col>
         ))}
       </Row>
