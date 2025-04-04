@@ -1,22 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Card, Spinner, Button } from 'react-bootstrap';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Container, Card, Spinner, Alert } from "react-bootstrap";
 
-const DonationItemDetail = () => {
+function DonationItemDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const API_BASE = "http://localhost:3002/api/donation-items";
 
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`https://take-it-home-8ldm.onrender.com/api/donation-items/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch item");
+        const res = await fetch(`${API_BASE}/${id}`);
+        if (!res.ok) throw new Error("Item not found");
         const data = await res.json();
         setItem(data);
-      } catch (error) {
-        console.error("Fetch error:", error);
+      } catch (err) {
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -25,51 +27,31 @@ const DonationItemDetail = () => {
     fetchItem();
   }, [id]);
 
-  if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
-  if (!item) return <div className="text-center mt-5">Item not found</div>;
+  if (loading) return <Spinner animation="border" />;
+  if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
-    <Container className="mt-5">
-      <h3 className="text-center mb-4">Donation Listing Details</h3>
+    <Container className="mt-4">
       <Card>
         {item.imageUrl && (
           <Card.Img
             variant="top"
-            src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
-            style={{ maxHeight: "400px", objectFit: "cover" }}
+            src={`http://localhost:3002${item.imageUrl}`}
+            style={{ maxHeight: "300px", objectFit: "cover" }}
           />
-        )}
-        {item.videoUrl && (
-          <video controls style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}>
-            <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
-          </video>
         )}
         <Card.Body>
           <Card.Title>{item.title}</Card.Title>
-          <Card.Text><strong>Description:</strong> {item.description}</Card.Text>
-          <Card.Text><strong>Category:</strong> {item.category}</Card.Text>
-          <Card.Text><strong>Condition:</strong> {item.condition}</Card.Text>
-          <Card.Text><strong>Location:</strong> {item.location}</Card.Text>
-
-          <Button
-            variant="primary"
-            className="mt-3"
-            onClick={() =>
-              navigate(`/donate/${item._id}/message`, {
-                state: {
-                  itemTitle: item.title,
-                  receiverId: item.userId,
-                  itemType: "donation"
-                }
-              })
-            }
-          >
-            Send Request
-          </Button>
+          <Card.Text>{item.description}</Card.Text>
+          <Card.Text>
+            <strong>Category:</strong> {item.category} <br />
+            <strong>Condition:</strong> {item.condition} <br />
+            <strong>Location:</strong> {item.location}
+          </Card.Text>
         </Card.Body>
       </Card>
     </Container>
   );
-};
+}
 
 export default DonationItemDetail;
