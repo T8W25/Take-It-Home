@@ -20,6 +20,8 @@ import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword'; // ✅ Import ForgotPassword
 import ResetPassword from './pages/ResetPassword'; // ✅ Import ResetPassword
+import ReportPage from './pages/ReportPage';
+
 
 function App() {
   return (
@@ -43,6 +45,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ✅ Forgot Password Route */}
         <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* ✅ Reset Password Route */}
+        <Route path="/report/:id" element={<ReportPage />} />
       </Routes>
     </>
   );
