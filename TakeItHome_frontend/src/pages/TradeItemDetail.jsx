@@ -18,12 +18,13 @@ const TradeItemDetail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`https://take-it-home-8ldm.onrender.com/api/trade-items/${id}`);
+        const res = await fetch(`http://localhost:3002/api/trade-items/${id}`);
         if (!res.ok) throw new Error("Failed to fetch item");
         const data = await res.json();
         setItem(data);
       } catch (error) {
         console.error("Fetch error:", error);
+        setItem(null);
       } finally {
         setLoading(false);
       }
@@ -32,29 +33,18 @@ const TradeItemDetail = () => {
     fetchItem();
   }, [id]);
 
-  const handleRequestSubmit = async () => {
+  const handleRequestSubmit = () => {
     if (!name || !email || !phoneNumber || !message) {
       setRequestStatus({ type: 'danger', text: 'Please fill in all fields before submitting your request.' });
       return;
     }
 
-    try {
-      console.log(`Request for Item: ${item.title}`);
-      console.log(`Name: ${name}`);
-      console.log(`Email: ${email}`);
-      console.log(`Phone Number: ${phoneNumber}`);
-      console.log(`Message: ${message}`);
+    console.log("✅ Request sent with details:");
+    console.log({ itemId: item._id, name, email, phoneNumber, message });
 
-      setRequestStatus({ type: 'success', text: 'Your request has been sent successfully!' });
-      setShowModal(false); // Close the modal
-      setName(""); // Clear input fields
-      setEmail("");
-      setPhoneNumber("");
-      setMessage("");
-    } catch (error) {
-      console.error('Request error:', error);
-      setRequestStatus({ type: 'danger', text: 'Failed to send the request. Please try again later.' });
-    }
+    setRequestStatus({ type: 'success', text: 'Your request has been sent successfully!' });
+    setShowModal(false);
+    setName(""); setEmail(""); setPhoneNumber(""); setMessage("");
   };
 
   if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
@@ -67,13 +57,13 @@ const TradeItemDetail = () => {
         {item.imageUrl && (
           <Card.Img
             variant="top"
-            src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
+            src={`http://localhost:3002${item.imageUrl}`}
             style={{ maxHeight: "400px", objectFit: "cover" }}
           />
         )}
         {item.videoUrl && (
           <video controls style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}>
-            <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
+            <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
           </video>
         )}
         <Card.Body>
@@ -82,78 +72,34 @@ const TradeItemDetail = () => {
           <Card.Text><strong>Category:</strong> {item.category}</Card.Text>
           <Card.Text><strong>Condition:</strong> {item.condition}</Card.Text>
           <Card.Text><strong>Location:</strong> {item.location}</Card.Text>
-
-          <Button
-            variant="primary"
-            className="mt-3"
-            onClick={() => setShowModal(true)} // Show the modal on button click
-          >
+          <Button variant="primary" className="mt-3" onClick={() => setShowModal(true)}>
             Send Request
           </Button>
         </Card.Body>
       </Card>
 
-      {/* Request Item Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Send Request for Item: {item.title}</Modal.Title>
-        </Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Send Request for {item.title}</Modal.Title></Modal.Header>
         <Modal.Body>
           {requestStatus && <Alert variant={requestStatus.type}>{requestStatus.text}</Alert>}
           <Form>
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                required
-              />
+            <Form.Group><Form.Label>Name</Form.Label>
+              <Form.Control value={name} onChange={(e) => setName(e.target.value)} required />
             </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
+            <Form.Group><Form.Label>Email</Form.Label>
+              <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Phone Number</Form.Label>
-              <Form.Control
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="Enter your phone number"
-                required
-              />
+            <Form.Group><Form.Label>Phone</Form.Label>
+              <Form.Control value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
             </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Enter a message for the item owner"
-                required
-              />
+            <Form.Group><Form.Label>Message</Form.Label>
+              <Form.Control as="textarea" rows={3} value={message} onChange={(e) => setMessage(e.target.value)} required />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleRequestSubmit}>
-            Submit Request
-          </Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
+          <Button variant="primary" onClick={handleRequestSubmit}>Submit</Button>
         </Modal.Footer>
       </Modal>
     </Container>
