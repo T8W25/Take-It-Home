@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
-import { useLocation, Link } from "react-router-dom";  // Link is used for navigation
+import { Link } from "react-router-dom";
 
 function PostItemDonation() {
   const [title, setTitle] = useState("");
@@ -16,11 +16,11 @@ function PostItemDonation() {
   const [editItemId, setEditItemId] = useState(null);
 
   const API_BASE = "http://localhost:3002/api/donation-items";
-  const navigate = useLocation();
 
+  // Fetch items on component mount or after an action like adding or editing
   useEffect(() => {
     fetchItems();
-  }, [navigate]);
+  }, []);
 
   const fetchItems = async () => {
     try {
@@ -221,7 +221,7 @@ function PostItemDonation() {
               </>
             )}
 
-            {/* Submit */}
+            {/* Submit Button */}
             <Button type="submit" variant="primary" className="w-100">
               {editMode ? "Update Item" : "Post Item"}
             </Button>
@@ -255,13 +255,25 @@ function PostItemDonation() {
                     </Card.Body>
                   </Card>
                 </Link>
-                {/* Edit, Delete and Report buttons */}
-                <Button variant="warning" className="me-2 mt-2" onClick={() => handleEdit(item)}>Edit</Button>
-                <Button variant="danger" className="mt-2" onClick={() => handleDelete(item._id)}>Delete</Button>
-                {/* Report Button */}
-                <Link to={`/report/${item._id}`} style={{ textDecoration: 'none' }}>
-                  <Button variant="info" className="mt-2">Report</Button>
-                </Link>
+                {/* Action Buttons (Edit, Delete, Report) */}
+<div className="d-flex justify-content-between mt-2">
+  {/* Edit Button */}
+  <Button variant="warning" onClick={() => handleEdit(item)} className="me-2">
+    Edit
+  </Button>
+  
+  {/* Delete Button */}
+  <Button variant="danger" onClick={() => handleDelete(item._id)} className="me-2">
+    Delete
+  </Button>
+  
+  {/* Report Button */}
+  <Link to={`/report/${item._id}`} style={{ textDecoration: 'none' }}>
+    <Button variant="info" className="w-auto">
+      Report
+    </Button>
+  </Link>
+</div>
               </Col>
             ))}
           </Row>
