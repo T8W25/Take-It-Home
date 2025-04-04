@@ -17,8 +17,9 @@ import MessageRequest from './pages/MessageRequest';
 import MessageRequestTrade from './pages/MessageRequestTrade';
 import ChatPage from './pages/ChatPage';
 import Notifications from './pages/Notifications';
-import ReportPage from './pages/ReportPage';  // Import the ReportPage
-
+import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword'; // ✅ Import ForgotPassword
+import ResetPassword from './pages/ResetPassword'; // ✅ Import ResetPassword
 
 function App() {
   return (
@@ -38,11 +39,13 @@ function App() {
         <Route path="/trade/:id/message" element={<MessageRequestTrade />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<Notifications />} />
-        <Route path="/report" element={<ReportPage />} />
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ✅ Forgot Password Route */}
+        <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* ✅ Reset Password Route */}
       </Routes>
     </>
   );
 }
-
 
 export default App;
