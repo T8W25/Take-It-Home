@@ -3,12 +3,13 @@ import { useParams } from "react-router-dom";
 import { Card, Button, Container, Row, Col, Alert, Form } from "react-bootstrap";
 
 function ReportPage() {
-  const { id } = useParams();  // Retrieve the item ID from the URL
+  const { id, type } = useParams();  // Retrieve both item ID and type (trade or donate) from the URL
   const [item, setItem] = useState(null);
   const [message, setMessage] = useState(null);
   const [reason, setReason] = useState("");  // State to hold the report reason
 
-  const API_BASE = "http://localhost:3002/api/trade-items"; // Your API base URL
+  // Set base URL dynamically based on item type
+  const API_BASE = type === "trade" ? "http://localhost:3002/api/trade-items" : "http://localhost:3002/api/donation-items"; 
 
   useEffect(() => {
     const fetchItemDetails = async () => {
@@ -23,7 +24,7 @@ function ReportPage() {
       }
     };
     fetchItemDetails();
-  }, [id]);
+  }, [id, type]);
 
   const handleReport = async () => {
     if (!reason) {
@@ -55,7 +56,9 @@ function ReportPage() {
     <Container>
       <Row className="justify-content-md-center mt-5">
         <Col xs={12} md={8}>
-          <h2 className="text-center mb-4">Report Trade Item</h2>
+          <h2 className="text-center mb-4">
+            Report {type === "trade" ? "Trade" : "Donation"} Item
+          </h2>
 
           {message && <Alert variant={message.type}>{message.text}</Alert>}
 
