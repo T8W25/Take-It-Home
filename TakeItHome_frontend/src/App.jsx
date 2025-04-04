@@ -17,7 +17,7 @@ import MessageRequest from './pages/MessageRequest';
 import MessageRequestTrade from './pages/MessageRequestTrade';
 import ChatPage from './pages/ChatPage';
 import Notifications from './pages/Notifications';
-
+import ReportPage from './pages/ReportPage';  // Import the ReportPage
 
 function App() {
   return (
@@ -37,6 +37,7 @@ function App() {
         <Route path="/trade/:id/message" element={<MessageRequestTrade />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/report" element={<ReportPage />} />  {/* Add the route for the ReportPage */}
       </Routes>
     </>
   );
