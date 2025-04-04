@@ -99,6 +99,9 @@ function Login() {
               <Button variant="primary" type="submit" className="w-100">
                 Login
               </Button>
+              <div className="text-center mt-3">
+                <a href="/forgot-password">Forgot Password?</a>
+              </div>
             </Form>
           )}
 

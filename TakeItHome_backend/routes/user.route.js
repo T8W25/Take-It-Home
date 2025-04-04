@@ -18,4 +18,5 @@ router.get(
   userController.getUserProfile
 );
 
+
 module.exports = router;
