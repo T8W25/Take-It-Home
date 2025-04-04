@@ -7,58 +7,34 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import SearchBar from "./SearchBar";
 import axios from "axios";
 
+const API_BASE = "http://localhost:3002";
+
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
 
-  const checkAuth = () => {
-    const token = localStorage.getItem("jwtToken");
-    setIsLoggedIn(!!token);
-
-    if (token) {
-      axios
-        .get("https://take-it-home-8ldm.onrender.com/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          setProfileImage(res.data.profileImage);
-        })
-        .catch((err) => {
-          console.error("❌ Profile fetch error:", err);
-          setProfileImage(null);
-        });
-    } else {
-      setProfileImage(null);
-    }
-  };
-
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
-    setIsLoggedIn(!!token);
-  
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!token && !!user);
+
     if (token) {
       axios
-        .get("https://take-it-home-8ldm.onrender.com/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        .get(`${API_BASE}/api/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => {
-          setProfileImage(res.data.profileImage);
-        })
-        .catch((err) => {
-          console.error("❌ Failed to fetch profile:", err.message);
-        });
+        .then((res) => setProfileImage(res.data.profileImage))
+        .catch(() => setProfileImage(null));
     }
-  }, [localStorage.getItem("jwtToken")]); // ✅ this line re-runs on login
-  
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("jwtToken");
+    localStorage.clear();
     setIsLoggedIn(false);
     setProfileImage(null);
     navigate("/login");
+    window.location.reload();
   };
 
   return (
@@ -71,12 +47,10 @@ const NavBar = () => {
             width="80"
             height="60"
             style={{ borderRadius: "50%", objectFit: "cover" }}
-            className="d-inline-block align-top"
           />
         </Navbar.Brand>
-
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
+        <Navbar.Toggle />
+        <Navbar.Collapse>
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
@@ -84,17 +58,13 @@ const NavBar = () => {
             {isLoggedIn && <Nav.Link as={Link} to="/trade-item">Trade</Nav.Link>}
             {isLoggedIn && <Nav.Link as={Link} to="/donate-item">Donate</Nav.Link>}
           </Nav>
-
-          <div className="me-3">
-            <SearchBar />
-          </div>
-
+          <div className="me-3"><SearchBar /></div>
           <Nav className="ms-auto">
             <NavDropdown
               title={
                 <span>
                   <img
-                    src={profileImage ? `https://take-it-home-8ldm.onrender.com${profileImage}` : "/default-profile.png"}
+                    src={profileImage ? `${API_BASE}${profileImage}` : "/default-profile.png"}
                     alt="Profile"
                     width="30"
                     height="30"
@@ -113,13 +83,12 @@ const NavBar = () => {
                 </>
               ) : (
                 <>
-                <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/chat">Messages</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/notifications">Notifications</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
-              </>
-              
+                  <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/chat">Messages</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/notifications">Notifications</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+                </>
               )}
             </NavDropdown>
           </Nav>
@@ -130,3 +99,4 @@ const NavBar = () => {
 };
 
 export default NavBar;
+

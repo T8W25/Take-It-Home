@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
+const API_LOGIN_URL = "http://localhost:3002/api/auth/login";
+const API_LOGOUT_URL = "http://localhost:3002/api/auth/logout";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const API_LOGIN_URL = "https://take-it-home-8ldm.onrender.com/api/auth/login";
-  const API_LOGOUT_URL = "https://take-it-home-8ldm.onrender.com/api/auth/logout";
 
   const navigate = useNavigate();
 
@@ -21,7 +21,6 @@ function Login() {
     }
   }, []);
 
-  // ✅ LOGIN FUNCTION
   const handleLogin = async (event) => {
     event.preventDefault();
     setMessage(null);
@@ -44,7 +43,6 @@ function Login() {
       setIsLoggedIn(true);
       setMessage({ type: "success", text: "Login successful!" });
 
-      // ✅ Force a full reload to fix navbar state (profile image, trade/donate links)
       navigate("/");
       window.location.reload();
     } catch (error) {
@@ -52,13 +50,11 @@ function Login() {
     }
   };
 
-  // ✅ LOGOUT FUNCTION
   const handleLogout = async () => {
     try {
       await fetch(API_LOGOUT_URL, { method: "POST" });
 
-      localStorage.removeItem("jwtToken");
-      localStorage.removeItem("user");
+      localStorage.clear();
       setIsLoggedIn(false);
       setMessage({ type: "success", text: "Logout successful!" });
 

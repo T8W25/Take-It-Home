@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Container, Row, Col, Alert, Card, Modal } from "react-bootstrap";
-import { useNavigate, Link } from "react-router-dom";
+import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 function PostItemTrade() {
   const [title, setTitle] = useState("");
@@ -15,21 +15,11 @@ function PostItemTrade() {
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
 
-  const [showModal, setShowModal] = useState(false);
-  const [requestMessage, setRequestMessage] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [userLocation, setUserLocation] = useState(""); // User's location for the request
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [requestStatus, setRequestStatus] = useState(null); // For request success/failure notification
-
-  const API_BASE = "https://take-it-home-8ldm.onrender.com/api/trade-items";
-  const navigate = useNavigate();
+  const API_BASE = "http://localhost:3002/api/trade-items";
 
   useEffect(() => {
     fetchItems();
-  }, [navigate]);
+  }, []);
 
   const fetchItems = async () => {
     try {
@@ -65,7 +55,7 @@ function PostItemTrade() {
       let res;
       if (editMode) {
         res = await fetch(`${API_BASE}/edit/${editItemId}`, {
-          method: "POST", // using POST instead of PUT
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -83,6 +73,7 @@ function PostItemTrade() {
 
       if (!res.ok) throw new Error(editMode ? "Failed to update item" : "Failed to post item");
 
+      const result = await res.json();
       setMessage({ type: "success", text: editMode ? "Item updated successfully!" : "Item posted successfully!" });
       resetForm();
       fetchItems();
@@ -104,17 +95,6 @@ function PostItemTrade() {
     setEditItemId(null);
   };
 
-  const handleEdit = (item) => {
-    setEditMode(true);
-    setEditItemId(item._id);
-    setTitle(item.title);
-    setCategory(item.category);
-    setCondition(item.condition);
-    setDescription(item.description);
-    setLocation(item.location);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     const token = localStorage.getItem("jwtToken");
@@ -127,38 +107,6 @@ function PostItemTrade() {
       fetchItems();
     } catch (err) {
       console.error("❌ Delete error:", err);
-    }
-  };
-
-  const handleRequestItem = (item) => {
-    setSelectedItem(item);
-    setShowModal(true);
-  };
-
-  const handleRequestSubmit = async () => {
-    if (!name || !email || !phoneNumber || !userLocation || !requestMessage) {
-      alert("Please fill in all the required fields.");
-      return;
-    }
-
-    try {
-      console.log(`Request for Item: ${selectedItem.title}`);
-      console.log(`Name: ${name}`);
-      console.log(`Email: ${email}`);
-      console.log(`Phone Number: ${phoneNumber}`);
-      console.log(`Location: ${userLocation}`);
-      console.log(`Message: ${requestMessage}`);
-
-      setRequestStatus({ type: "success", text: "Your request has been sent successfully!" }); // Success notification
-      setShowModal(false); // Close the modal
-      setRequestMessage(""); // Clear request message
-      setName(""); // Clear name field
-      setEmail(""); // Clear email field
-      setPhoneNumber(""); // Clear phone number field
-      setUserLocation(""); // Clear user location field
-    } catch (err) {
-      console.error("❌ Request error:", err);
-      setRequestStatus({ type: "danger", text: "Failed to send request. Please try again later." });
     }
   };
 
@@ -224,9 +172,6 @@ function PostItemTrade() {
               {editMode ? "Update Item" : "Post Item"}
             </Button>
           </Form>
-
-          {/* Display the request status notification */}
-          {requestStatus && <Alert variant={requestStatus.type}>{requestStatus.text}</Alert>}
         </Col>
       </Row>
 
@@ -240,13 +185,13 @@ function PostItemTrade() {
                 {item.imageUrl && (
                   <Card.Img
                     variant="top"
-                    src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
+                    src={`http://localhost:3002${item.imageUrl}`}
                     style={{ maxHeight: "200px", objectFit: "cover" }}
                   />
                 )}
                 {!item.imageUrl && item.videoUrl && (
                   <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                    <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
+                    <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
                   </video>
                 )}
                 <Card.Body>
@@ -261,87 +206,15 @@ function PostItemTrade() {
               </Card>
             </Link>
             <div className="mt-2 d-flex justify-content-between">
-              <Button variant="secondary" onClick={() => handleEdit(item)}>Edit</Button>
-              <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
-              <Button variant="primary" onClick={() => handleRequestItem(item)}>Request Item</Button>
+              <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>
+              <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
+              <Link to={`/report/${item._id}`}>
+                <Button variant="danger">Report</Button>
+              </Link>
             </div>
           </Col>
         ))}
       </Row>
-
-      {/* Request Item Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Request Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Phone Number</Form.Label>
-              <Form.Control
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="Enter your phone number"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Location</Form.Label>
-              <Form.Control
-                type="text"
-                value={userLocation}
-                onChange={(e) => setUserLocation(e.target.value)}
-                placeholder="Enter your location"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={requestMessage}
-                onChange={(e) => setRequestMessage(e.target.value)}
-                placeholder="Enter a message for the item owner"
-                required
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleRequestSubmit}>
-            Submit Request
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 }

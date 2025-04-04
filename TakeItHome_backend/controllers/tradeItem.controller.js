@@ -1,10 +1,9 @@
-// ✅ File: controllers/tradeItem.controller.js
 const TradeItem = require("../models/tradeItem.model");
 
-// ✅ GET: All trade items
+// ✅ GET: All trade items with user info
 const getTradeItems = async (req, res) => {
   try {
-    const items = await TradeItem.find();
+    const items = await TradeItem.find().populate("userId", "username profileImage");
     res.status(200).json(items);
   } catch (error) {
     console.error("❌ Fetch Trade Items Error:", error);
@@ -12,7 +11,6 @@ const getTradeItems = async (req, res) => {
   }
 };
 
-// ✅ POST: Create new trade item
 const createTradeItem = async (req, res) => {
   try {
     const { title, category, condition, description, location } = req.body;
@@ -42,7 +40,6 @@ const createTradeItem = async (req, res) => {
   }
 };
 
-// ✅ PUT: Update trade item
 const updateTradeItem = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);
@@ -79,7 +76,6 @@ const updateTradeItem = async (req, res) => {
   }
 };
 
-// ✅ DELETE: Remove trade item
 const deleteTradeItem = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);
@@ -97,7 +93,6 @@ const deleteTradeItem = async (req, res) => {
   }
 };
 
-// ✅ SEARCH Items
 const searchTradeItems = async (req, res) => {
   try {
     const { q, category, location } = req.query;
@@ -111,14 +106,13 @@ const searchTradeItems = async (req, res) => {
     if (category) query.category = category;
     if (location) query.location = location;
 
-    const items = await TradeItem.find(query);
+    const items = await TradeItem.find(query).populate("userId", "username profileImage");
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ message: "Search error", error: error.message });
   }
 };
 
-// ✅ GET by ID
 const getTradeItemById = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);
