@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function PostItemTrade() {
   const [title, setTitle] = useState("");
@@ -16,11 +16,10 @@ function PostItemTrade() {
   const [editItemId, setEditItemId] = useState(null);
 
   const API_BASE = "http://localhost:3002/api/trade-items";
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
-  }, [navigate]);
+  }, []);
 
   const fetchItems = async () => {
     try {
@@ -56,13 +55,12 @@ function PostItemTrade() {
       let res;
       if (editMode) {
         res = await fetch(`${API_BASE}/edit/${editItemId}`, {
-          method: "POST", // using POST instead of PUT
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
           body: formData,
         });
-        
       } else {
         res = await fetch(`${API_BASE}/post`, {
           method: "POST",
@@ -95,17 +93,6 @@ function PostItemTrade() {
     setVideo(null);
     setEditMode(false);
     setEditItemId(null);
-  };
-
-  const handleEdit = (item) => {
-    setEditMode(true);
-    setEditItemId(item._id);
-    setTitle(item.title);
-    setCategory(item.category);
-    setCondition(item.condition);
-    setDescription(item.description);
-    setLocation(item.location);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id) => {
@@ -221,6 +208,9 @@ function PostItemTrade() {
             <div className="mt-2 d-flex justify-content-between">
               <Button variant="secondary" onClick={() => handleEditClick(item)}>Edit</Button>
               <Button variant="danger" onClick={() => handleDeleteClick(item._id)}>Delete</Button>
+              <Link to={`/report/${item._id}`}>
+                <Button variant="danger">Report</Button>
+              </Link>
             </div>
           </Col>
         ))}

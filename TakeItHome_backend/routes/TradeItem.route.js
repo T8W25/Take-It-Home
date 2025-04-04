@@ -10,6 +10,7 @@ const {
   deleteTradeItem,
   searchTradeItems,
   getTradeItemById,
+  reportTradeItem,  // Import the report function
 } = require("../controllers/tradeItem.controller");
 
 // ✅ Multer Setup
@@ -48,7 +49,9 @@ router.put(
   updateTradeItem
 );
 
-
 router.delete("/delete/:id", verifyToken, deleteTradeItem);
+
+// ✅ New route for reporting a trade item
+router.post("/report/:id", verifyToken, reportTradeItem);  // Add this line for reporting functionality
 
 module.exports = router;

@@ -1,5 +1,7 @@
 // ✅ File: controllers/tradeItem.controller.js
+
 const TradeItem = require("../models/tradeItem.model");
+const Report = require("../models/report.model");  // Assuming a Report model for storing reported items
 
 // ✅ GET: All trade items
 const getTradeItems = async (req, res) => {
@@ -129,11 +131,42 @@ const getTradeItemById = async (req, res) => {
   }
 };
 
+// ✅ POST: Report a trade item
+const reportTradeItem = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const tradeItemId = req.params.id;
+
+    if (!reason) {
+      return res.status(400).json({ message: "Reason for reporting is required." });
+    }
+
+    // Find the trade item
+    const tradeItem = await TradeItem.findById(tradeItemId);
+    if (!tradeItem) return res.status(404).json({ message: "Trade item not found" });
+
+    // Create a report
+    const newReport = new Report({
+      tradeItemId,
+      userId: req.user.id,
+      reason
+    });
+
+    await newReport.save();
+
+    res.status(201).json({ message: "Trade item reported", report: newReport });
+  } catch (error) {
+    console.error("❌ Report Trade Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   getTradeItems,
   createTradeItem,
   updateTradeItem,
   deleteTradeItem,
   searchTradeItems,
-  getTradeItemById
+  getTradeItemById,
+  reportTradeItem
 };
