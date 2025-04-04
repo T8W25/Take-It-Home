@@ -1,5 +1,3 @@
-// PostItemTrade.jsx
-
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert, Card, Modal } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
@@ -22,12 +20,9 @@ function PostItemTrade() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [userLocation, setUserLocation] = useState("");
+  const [userLocation, setUserLocation] = useState(""); // User's location for the request
   const [selectedItem, setSelectedItem] = useState(null);
-
-  const [showReportModal, setShowReportModal] = useState(false);
-  const [reportMessage, setReportMessage] = useState("");
-  const [reportItemId, setReportItemId] = useState(null);
+  const [requestStatus, setRequestStatus] = useState(null); // For request success/failure notification
 
   const API_BASE = "https://take-it-home-8ldm.onrender.com/api/trade-items";
   const navigate = useNavigate();
@@ -70,14 +65,18 @@ function PostItemTrade() {
       let res;
       if (editMode) {
         res = await fetch(`${API_BASE}/edit/${editItemId}`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          method: "POST", // using POST instead of PUT
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         });
       } else {
         res = await fetch(`${API_BASE}/post`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         });
       }
@@ -143,64 +142,93 @@ function PostItemTrade() {
     }
 
     try {
-      setShowModal(false);
-      alert("Request sent successfully!");
-      setRequestMessage("");
-      setName("");
-      setEmail("");
-      setPhoneNumber("");
-      setUserLocation("");
+      console.log(`Request for Item: ${selectedItem.title}`);
+      console.log(`Name: ${name}`);
+      console.log(`Email: ${email}`);
+      console.log(`Phone Number: ${phoneNumber}`);
+      console.log(`Location: ${userLocation}`);
+      console.log(`Message: ${requestMessage}`);
+
+      setRequestStatus({ type: "success", text: "Your request has been sent successfully!" }); // Success notification
+      setShowModal(false); // Close the modal
+      setRequestMessage(""); // Clear request message
+      setName(""); // Clear name field
+      setEmail(""); // Clear email field
+      setPhoneNumber(""); // Clear phone number field
+      setUserLocation(""); // Clear user location field
     } catch (err) {
       console.error("❌ Request error:", err);
-      alert("Failed to send request.");
-    }
-  };
-
-  const handleReportClick = (item) => {
-    setReportItemId(item._id);
-    setShowReportModal(true);
-  };
-
-  const handleReportSubmit = async () => {
-    if (!reportMessage || !reportItemId) {
-      alert("All fields are required.");
-      return;
-    }
-
-    try {
-      const res = await fetch("https://take-it-home-8ldm.onrender.com/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reportType: "trade",
-          itemId: reportItemId,
-          message: reportMessage,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to submit report");
-      setShowReportModal(false);
-      setReportMessage("");
-      alert("Report submitted successfully!");
-    } catch (err) {
-      console.error("❌ Report error:", err);
-      alert("Failed to submit report.");
+      setRequestStatus({ type: "danger", text: "Failed to send request. Please try again later." });
     }
   };
 
   return (
     <Container>
-      <h3 className="text-center my-5">{editMode ? "Edit Trade Item" : "Post a Trade Item"}</h3>
-      {message && <Alert variant={message.type}>{message.text}</Alert>}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group><Form.Label>Title</Form.Label><Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} required /></Form.Group>
-        <Form.Group><Form.Label>Category</Form.Label><Form.Control type="text" value={category} onChange={(e) => setCategory(e.target.value)} required /></Form.Group>
-        <Form.Group><Form.Label>Condition</Form.Label><Form.Control type="text" value={condition} onChange={(e) => setCondition(e.target.value)} required /></Form.Group>
-        <Form.Group><Form.Label>Description</Form.Label><Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} required /></Form.Group>
-        <Form.Group><Form.Label>Location</Form.Label><Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} required /></Form.Group>
-        <Form.Group><Form.Label>Upload Image/Video</Form.Label><Form.Control type="file" accept="image/*, video/*" onChange={(e) => { if (e.target.files[0]) setImage(e.target.files[0]); }} /></Form.Group>
-        <Button variant="primary" type="submit">{editMode ? "Update" : "Post"}</Button>
-      </Form>
+      <Row className="justify-content-md-center mt-5">
+        <Col xs={12} md={6}>
+          <h2 className="text-center mb-4">{editMode ? "Edit" : "Post a"} Trade Item</h2>
+
+          {message && <Alert variant={message.type}>{message.text}</Alert>}
+
+          <Form onSubmit={handleSubmit} encType="multipart/form-data">
+            <Form.Group className="mb-3">
+              <Form.Label>Item Name</Form.Label>
+              <Form.Control type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter item name" required />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              <Form.Select value={category} onChange={(e) => setCategory(e.target.value)} required>
+                <option value="">Select Category</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Books">Books</option>
+                <option value="Sports">Sports</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Location</Form.Label>
+              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter your location" required />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Condition</Form.Label>
+              <Form.Select value={condition} onChange={(e) => setCondition(e.target.value)} required>
+                <option value="">Select Condition</option>
+                <option value="New">New</option>
+                <option value="Used">Used</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter item description" required />
+            </Form.Group>
+
+            {!editMode && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Upload Image</Form.Label>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Upload Video (Optional)</Form.Label>
+                  <Form.Control type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} />
+                </Form.Group>
+              </>
+            )}
+
+            <Button type="submit" variant="primary" className="w-100">
+              {editMode ? "Update Item" : "Post Item"}
+            </Button>
+          </Form>
+
+          {/* Display the request status notification */}
+          {requestStatus && <Alert variant={requestStatus.type}>{requestStatus.text}</Alert>}
+        </Col>
+      </Row>
 
       <hr className="my-5" />
       <h3 className="text-center">Posted Trade Listings</h3>
@@ -216,6 +244,11 @@ function PostItemTrade() {
                     style={{ maxHeight: "200px", objectFit: "cover" }}
                   />
                 )}
+                {!item.imageUrl && item.videoUrl && (
+                  <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
+                    <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
+                  </video>
+                )}
                 <Card.Body>
                   <Card.Title>{item.title}</Card.Title>
                   <Card.Text>{item.description}</Card.Text>
@@ -230,43 +263,83 @@ function PostItemTrade() {
             <div className="mt-2 d-flex justify-content-between">
               <Button variant="secondary" onClick={() => handleEdit(item)}>Edit</Button>
               <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
-              <Button variant="primary" onClick={() => handleRequestItem(item)}>Request</Button>
-              <Button variant="warning" onClick={() => handleReportClick(item)}>Report</Button>
+              <Button variant="primary" onClick={() => handleRequestItem(item)}>Request Item</Button>
             </div>
           </Col>
         ))}
       </Row>
 
-      {/* Request Modal */}
+      {/* Request Item Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton><Modal.Title>Request Item</Modal.Title></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title>Request Item</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group><Form.Label>Name</Form.Label><Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} required /></Form.Group>
-            <Form.Group><Form.Label>Email</Form.Label><Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></Form.Group>
-            <Form.Group><Form.Label>Phone Number</Form.Label><Form.Control type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required /></Form.Group>
-            <Form.Group><Form.Label>Location</Form.Label><Form.Control type="text" value={userLocation} onChange={(e) => setUserLocation(e.target.value)} required /></Form.Group>
-            <Form.Group><Form.Label>Message</Form.Label><Form.Control as="textarea" rows={3} value={requestMessage} onChange={(e) => setRequestMessage(e.target.value)} required /></Form.Group>
+            <Form.Group>
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+                required
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Phone Number</Form.Label>
+              <Form.Control
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter your phone number"
+                required
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Location</Form.Label>
+              <Form.Control
+                type="text"
+                value={userLocation}
+                onChange={(e) => setUserLocation(e.target.value)}
+                placeholder="Enter your location"
+                required
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Message</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+                placeholder="Enter a message for the item owner"
+                required
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
-          <Button variant="primary" onClick={handleRequestSubmit}>Submit</Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Report Modal */}
-      <Modal show={showReportModal} onHide={() => setShowReportModal(false)}>
-        <Modal.Header closeButton><Modal.Title>Report Item</Modal.Title></Modal.Header>
-        <Modal.Body>
-          <Form.Group>
-            <Form.Label>Reason for reporting:</Form.Label>
-            <Form.Control as="textarea" rows={4} value={reportMessage} onChange={(e) => setReportMessage(e.target.value)} placeholder="Enter your reason" required />
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowReportModal(false)}>Cancel</Button>
-          <Button variant="danger" onClick={handleReportSubmit}>Submit Report</Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleRequestSubmit}>
+            Submit Request
+          </Button>
         </Modal.Footer>
       </Modal>
     </Container>
