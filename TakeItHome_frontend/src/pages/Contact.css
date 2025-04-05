@@ -1,0 +1,101 @@
+.contact-container {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .contact-3d-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ff4e50, #f9d423);
+    animation: animateBg 10s infinite alternate;
+    z-index: -1;
+  }
+  
+  @keyframes animateBg {
+    0% {
+      transform: scale(1) rotate(0deg);
+    }
+    50% {
+      transform: scale(1.2) rotate(180deg);
+    }
+    100% {
+      transform: scale(1) rotate(360deg);
+    }
+  }
+  
+  .contact-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    z-index: 1;
+  }
+  
+  .contact-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .contact-title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: #ff4e50;
+    margin: 10px auto;
+    border-radius: 2px;
+  }
+  
+  .contact-input,
+  .contact-textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: none;
+    background-color: #f1f5f9;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .contact-input:focus,
+  .contact-textarea:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 78, 80, 0.7);
+  }
+  
+  .contact-textarea {
+    height: 120px;
+  }
+  
+  .contact-button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #ff4e50, #f9d423);
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease;
+  }
+  
+  .contact-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(255, 78, 80, 0.6);
+  }
+  

@@ -1,5 +1,6 @@
 const DonationItem = require("../models/DonationItem.model");
 
+// ✅ Get all donation items
 const getDonationItems = async (req, res) => {
   try {
     const items = await DonationItem.find();
@@ -10,6 +11,21 @@ const getDonationItems = async (req, res) => {
   }
 };
 
+// ✅ Get donation item by ID
+const getDonationItemById = async (req, res) => {
+  try {
+    const item = await DonationItem.findById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ message: "Donation item not found" });
+    }
+    res.status(200).json(item);
+  } catch (error) {
+    console.error("❌ Fetch by ID Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// ✅ Create new donation item
 const createDonationItem = async (req, res) => {
   try {
     const { title, category, condition, description, location } = req.body;
@@ -17,7 +33,7 @@ const createDonationItem = async (req, res) => {
     const videoUrl = req.files?.video?.[0] ? `/uploads/${req.files.video[0].filename}` : null;
 
     if (!title || !category || !condition || !description || !location || (!imageUrl && !videoUrl)) {
-      return res.status(400).json({ message: "All fields and at least one media are required." });
+      return res.status(400).json({ message: "All fields and at least one media file are required." });
     }
 
     const newItem = new DonationItem({
@@ -39,48 +55,46 @@ const createDonationItem = async (req, res) => {
   }
 };
 
+// ✅ Update donation item
 const updateDonationItem = async (req, res) => {
   try {
     const item = await DonationItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
 
-    if (!item.userId || item.userId.toString() !== req.user.id) {
+    if (item.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const { title, category, condition, description } = req.body;
-    item.title = title;
-    item.category = category;
-    item.condition = condition;
-    item.description = description;
+    const { title, category, condition, description, location } = req.body;
+    Object.assign(item, { title, category, condition, description, location });
 
     await item.save();
     res.status(200).json({ message: "Item updated", item });
-  } catch (err) {
-    console.error("❌ Update Donation Error:", err);
-    res.status(500).json({ message: "Server Error", error: err.message });
+  } catch (error) {
+    console.error("❌ Update Donation Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-// ✅ DELETE: Remove donation item
+// ✅ Delete donation item
 const deleteDonationItem = async (req, res) => {
   try {
     const item = await DonationItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
 
-    if (!item.userId || item.userId.toString() !== req.user.id) {
+    if (item.userId.toString() !== req.user.id) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
     await item.deleteOne();
     res.status(200).json({ message: "Item deleted" });
-  } catch (err) {
-    console.error("❌ Delete Donation Error:", err);
-    res.status(500).json({ message: "Server Error", error: err.message });
+  } catch (error) {
+    console.error("❌ Delete Donation Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-// ✅ SEARCH: Donation items with optional filters
+// ✅ Search donation items
 const searchDonationItems = async (req, res) => {
   try {
     const { q, category, location } = req.query;
@@ -98,26 +112,16 @@ const searchDonationItems = async (req, res) => {
     const items = await DonationItem.find(query);
     res.status(200).json(items);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
-// ✅ GET: Donation item by ID
-const getDonationItemById = async (req, res) => {
-  try {
-    const item = await DonationItem.findById(req.params.id);
-    if (!item) return res.status(404).json({ message: "Donation item not found" });
-    res.status(200).json(item);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("❌ Search Donation Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
 module.exports = {
   getDonationItems,
+  getDonationItemById,
   createDonationItem,
   updateDonationItem,
   deleteDonationItem,
   searchDonationItems,
-  getDonationItemById,
 };
