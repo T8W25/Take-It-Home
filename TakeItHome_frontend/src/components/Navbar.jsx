@@ -1,32 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import NavDropdown from "react-bootstrap/NavDropdown";
 import SearchBar from "./SearchBar";
 import axios from "axios";
+import "./Navbar.css";
 
 const API_BASE = "http://localhost:3002";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+
     const token = localStorage.getItem("jwtToken");
     const user = localStorage.getItem("user");
     setIsLoggedIn(!!token && !!user);
 
     if (token) {
       axios
-        .get(`${API_BASE}/api/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        .get(`${API_BASE}/api/users/profile`, { headers: { Authorization: `Bearer ${token}` } })
         .then((res) => setProfileImage(res.data.profileImage))
         .catch(() => setProfileImage(null));
     }
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
@@ -38,66 +39,55 @@ const NavBar = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
-      <Container>
-        <Navbar.Brand as={Link} to="/">
-          <img
-            alt="logo"
-            src="/logo.png"
-            width="80"
-            height="60"
-            style={{ borderRadius: "50%", objectFit: "cover" }}
-          />
-        </Navbar.Brand>
-        <Navbar.Toggle />
-        <Navbar.Collapse>
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
-            <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
-            {isLoggedIn && <Nav.Link as={Link} to="/trade-item">Trade</Nav.Link>}
-            {isLoggedIn && <Nav.Link as={Link} to="/donate-item">Donate</Nav.Link>}
-          </Nav>
-          <div className="me-3"><SearchBar /></div>
-          <Nav className="ms-auto">
-            <NavDropdown
-              title={
-                <span>
-                  <img
-                    src={profileImage ? `${API_BASE}${profileImage}` : "/default-profile.png"}
-                    alt="Profile"
-                    width="30"
-                    height="30"
-                    className="rounded-circle me-2"
-                  />
-                  Account
-                </span>
-              }
-              id="account-dropdown"
-              align="end"
-            >
-              {!isLoggedIn ? (
-                <>
-                  <NavDropdown.Item as={Link} to="/login">Login</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/signup">Sign Up</NavDropdown.Item>
-                </>
-              ) : (
-                <>
-                  <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/chat">Messages</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/notifications">Notifications</NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
-                </>
-              )}
-            </NavDropdown>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+    <nav className={`navbar-3d ${isScrolled ? "scrolled" : ""}`}>
+      <div className="navbar-container">
+        <Link to="/" className="navbar-logo">
+          <img src="/logo.png" alt="logo" className="logo-hover-3d" />
+          <span className="logo-glow"></span>
+        </Link>
+        
+        <div className="navbar-links-left">
+          <Link to="/" className="nav-link-3d">Home</Link>
+          <Link to="/explore" className="nav-link-3d">Explore</Link>
+          <Link to="/contact" className="nav-link-3d">Contact</Link>
+          {isLoggedIn && <Link to="/trade-item" className="nav-link-3d">Trade</Link>}
+          {isLoggedIn && <Link to="/donate-item" className="nav-link-3d">Donate</Link>}
+        </div>
+
+        <div className="navbar-actions">
+          <SearchBar />
+          <div className="navbar-account">
+            <div className="dropdown-3d">
+              <button className="dropbtn-3d">
+                <img
+                  src={profileImage ? `${API_BASE}${profileImage}` : "/default-profile.png"}
+                  alt="Profile"
+                  className="profile-img-3d"
+                />
+                <span className="account-text-3d">Account</span>
+              </button>
+              <div className="dropdown-content-3d">
+                {!isLoggedIn ? (
+                  <>
+                    <Link to="/login">Login</Link>
+                    <Link to="/signup">Sign Up</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/profile">Profile</Link>
+                    <Link to="/chat">Messages</Link>
+                    <Link to="/notifications">Notifications</Link>
+                    <hr className="dropdown-divider" />
+                    <button onClick={handleLogout}>Logout</button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 
-
 export default NavBar;
-
