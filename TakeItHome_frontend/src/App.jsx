@@ -1,3 +1,4 @@
+// ✅ FULLY UPDATED App.jsx with working routes for posting and viewing
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Routes, Route } from 'react-router-dom';
@@ -7,9 +8,7 @@ import Explore from './pages/Explore';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import PostItemTrade from './pages/PostItemTrade';
 import './App.css';
-import PostItemDonation from './pages/PostItemDonation';
 import SearchResults from './pages/SearchResults';
 import TradeItemDetail from './pages/TradeItemDetail';
 import DonationItemDetail from './pages/DonationItemDetail';
@@ -18,10 +17,17 @@ import MessageRequestTrade from './pages/MessageRequestTrade';
 import ChatPage from './pages/ChatPage';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
-import ForgotPassword from './pages/ForgotPassword'; // ✅ Import ForgotPassword
-import ResetPassword from './pages/ResetPassword'; // ✅ Import ResetPassword
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ReportPage from './pages/ReportPage';
 
+// ✅ Newly cleaned-up listing-only pages
+import PostItemTrade from './pages/PostItemTrade';
+import PostItemDonation from './pages/PostItemDonation';
+
+// ✅ Forms from account section
+import PostTradeFromAccount from './pages/PostTradeFromAccount';
+import PostDonationFromAccount from './pages/PostDonationFromAccount';
 
 function App() {
   return (
@@ -33,8 +39,6 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/trade-item" element={<PostItemTrade />} />
-        <Route path="/donate-item" element={<PostItemDonation />} />
         <Route path="/trade/:id" element={<TradeItemDetail />} />
         <Route path="/donate/:id" element={<DonationItemDetail />} />
         <Route path="/donate/:id/message" element={<MessageRequest />} />
@@ -43,9 +47,17 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ✅ Forgot Password Route */}
-        <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* ✅ Reset Password Route */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/report/:id" element={<ReportPage />} />
+
+        {/* ✅ View posted listings only */}
+        <Route path="/trade-item" element={<PostItemTrade />} />
+        <Route path="/donate-item" element={<PostItemDonation />} />
+
+        {/* ✅ Forms for posting under account section */}
+        <Route path="/account/post-trade" element={<PostTradeFromAccount />} />
+        <Route path="/account/post-donation" element={<PostDonationFromAccount />} />
       </Routes>
     </>
   );

@@ -45,7 +45,7 @@ const NavBar = () => {
           <img src="/logo.png" alt="logo" className="logo-hover-3d" />
           <span className="logo-glow"></span>
         </Link>
-        
+
         <div className="navbar-links-left">
           <Link to="/" className="nav-link-3d">Home</Link>
           <Link to="/explore" className="nav-link-3d">Explore</Link>
@@ -77,6 +77,8 @@ const NavBar = () => {
                     <Link to="/profile">Profile</Link>
                     <Link to="/chat">Messages</Link>
                     <Link to="/notifications">Notifications</Link>
+                    <Link to="/account/post-trade">Post Trade</Link>
+                    <Link to="/account/post-donation">Post Donation</Link>
                     <hr className="dropdown-divider" />
                     <button onClick={handleLogout}>Logout</button>
                   </>
