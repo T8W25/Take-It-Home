@@ -1,0 +1,101 @@
+.post-donation-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    padding: 2.5rem;
+    background: linear-gradient(145deg, #2a2a72, #009ffd);
+    border-radius: 20px;
+    box-shadow:
+      0 10px 25px rgba(0, 0, 0, 0.4),
+      0 0 10px rgba(0, 191, 255, 0.3),
+      inset 0 0 20px rgba(0, 191, 255, 0.2);
+    transition: transform 0.4s ease;
+  }
+  
+  .post-donation-container:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 15px 30px rgba(0, 0, 0, 0.6),
+      0 0 20px rgba(0, 191, 255, 0.4),
+      inset 0 0 30px rgba(0, 191, 255, 0.3);
+  }
+  
+  .post-donation-title {
+    font-size: 2.2rem;
+    text-align: center;
+    color: #ffffff;
+    text-shadow: 0 0 8px #00c3ff;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .post-donation-title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: #00c3ff;
+    margin: 12px auto 0;
+    border-radius: 50%;
+    filter: blur(1px);
+  }
+  
+  .form-label-glow {
+    color: #ffffff;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+    text-shadow: 0 0 6px #00c3ff;
+  }
+  
+  .form-control-glow,
+  .form-select-glow {
+    background-color: rgba(10, 25, 47, 0.85);
+    color: #ffffff;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.1);
+  }
+  
+  .form-control-glow:focus,
+  .form-select-glow:focus {
+    outline: none;
+    border-color: #00c3ff;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+  }
+  
+  .file-input-glow {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    width: 100%;
+  }
+  
+  .submit-btn-glow {
+    background: linear-gradient(to right, #00c3ff, #00b4d8);
+    color: #0a192f;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 191, 255, 0.3);
+  }
+  
+  .submit-btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 191, 255, 0.5);
+  }
+  
+  .alert-custom {
+    background-color: rgba(10, 25, 47, 0.9);
+    color: white;
+    border-left: 5px solid #00c3ff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  }
+  

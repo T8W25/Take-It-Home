@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Form, Button, Container, Alert } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
+import "./PostTradeFromAccount.css"; // ✅ correct path
+ // IMPORT CSS FILE HERE
 
 const PostTradeFromAccount = () => {
   const [formData, setFormData] = useState({
@@ -11,107 +13,189 @@ const PostTradeFromAccount = () => {
     image: null,
     video: null,
   });
+
   const [message, setMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const API_BASE = "http://localhost:3002/api/trade-items";
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: files ? files[0] : value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     const token = localStorage.getItem("jwtToken");
     const form = new FormData();
 
-    for (let key in formData) {
-      if (formData[key]) form.append(key, formData[key]);
-    }
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) form.append(key, value);
+    });
 
     try {
       const res = await fetch(`${API_BASE}/post`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: form,
       });
 
-      if (!res.ok) throw new Error("Failed to post item");
-      setMessage({ type: "success", text: "Trade item posted successfully!" });
+      if (!res.ok) throw new Error(await res.text());
+      
+      const data = await res.json();
+      setMessage({ type: "success", text: "Item posted successfully!" });
       setFormData({
-        title: "",
-        category: "",
-        condition: "",
-        description: "",
-        location: "",
-        image: null,
-        video: null,
+        title: "", category: "", condition: "",
+        description: "", location: "", image: null, video: null
       });
     } catch (err) {
-      setMessage({ type: "danger", text: err.message });
+      setMessage({ type: "danger", text: err.message || "Posting failed" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Container className="mt-4">
-      <h3 className="text-center">Post Trade Item</h3>
-      {message && <Alert variant={message.type}>{message.text}</Alert>}
+    <div className="post-trade-container">
+      <h3 className="post-trade-title">Post Trade Item</h3>
+      
+      {message && (
+        <Alert variant={message.type} className="alert-3d">
+          {message.text}
+        </Alert>
+      )}
 
-      <Form onSubmit={handleSubmit} encType="multipart/form-data">
-        <Form.Group className="mb-3">
-          <Form.Label>Title</Form.Label>
-          <Form.Control name="title" value={formData.title} onChange={handleChange} required />
-        </Form.Group>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        {/* Title Field */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Title*</label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            className="form-control-3d"
+            required
+            placeholder="Enter item title"
+          />
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Category</Form.Label>
-          <Form.Select name="category" value={formData.category} onChange={handleChange} required>
-            <option value="">Select Category</option>
+        {/* Category Field */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Category*</label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="form-select-3d"
+            required
+          >
+            <option value="">Select a category</option>
             <option value="Electronics">Electronics</option>
             <option value="Furniture">Furniture</option>
             <option value="Clothing">Clothing</option>
-            <option value="Books">Books</option>
-            <option value="Sports">Sports</option>
-          </Form.Select>
-        </Form.Group>
+          </select>
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Condition</Form.Label>
-          <Form.Select name="condition" value={formData.condition} onChange={handleChange} required>
-            <option value="">Select Condition</option>
+        {/* Condition Field */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Condition*</label>
+          <select
+            name="condition"
+            value={formData.condition}
+            onChange={handleChange}
+            className="form-select-3d"
+            required
+          >
+            <option value="">Select condition</option>
             <option value="New">New</option>
-            <option value="Used">Used</option>
-          </Form.Select>
-        </Form.Group>
+            <option value="Used-LikeNew">Used - Like New</option>
+            <option value="Used-Good">Used - Good</option>
+          </select>
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control as="textarea" rows={3} name="description" value={formData.description} onChange={handleChange} required />
-        </Form.Group>
+        {/* Description Field */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Description*</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className="form-control-3d"
+            rows={4}
+            required
+            placeholder="Describe your item in detail..."
+          />
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Location</Form.Label>
-          <Form.Control name="location" value={formData.location} onChange={handleChange} required />
-        </Form.Group>
+        {/* Location Field */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Location*</label>
+          <input
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            className="form-control-3d"
+            required
+            placeholder="City, State"
+          />
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Upload Image</Form.Label>
-          <Form.Control type="file" name="image" accept="image/*" onChange={handleChange} />
-        </Form.Group>
+        {/* Image Upload */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Item Image*</label>
+          <div className="file-input-3d">
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleChange}
+              required
+            />
+            <span className="file-cta">
+              {formData.image ? formData.image.name : "Choose file..."}
+            </span>
+          </div>
+        </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Upload Video (Optional)</Form.Label>
-          <Form.Control type="file" name="video" accept="video/*" onChange={handleChange} />
-        </Form.Group>
+        {/* Video Upload */}
+        <div className="form-group-3d">
+          <label className="form-label-3d">Video (Optional)</label>
+          <div className="file-input-3d">
+            <input
+              type="file"
+              name="video"
+              accept="video/*"
+              onChange={handleChange}
+            />
+            <span className="file-cta">
+              {formData.video ? formData.video.name : "Choose file..."}
+            </span>
+          </div>
+        </div>
 
-        <Button type="submit" variant="primary" className="w-100">Post Item</Button>
-      </Form>
-    </Container>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className={`submit-btn-3d ${isSubmitting ? "submitting" : ""}`}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <span className="spinner"></span>
+              Posting...
+            </>
+          ) : (
+            "Post Item Now"
+          )}
+        </button>
+      </form>
+    </div>
   );
 };
 
