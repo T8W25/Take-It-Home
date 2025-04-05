@@ -30,7 +30,8 @@ const searchRoutes = require("./routes/search.route.js");
 const chatRoutes = require("./routes/chat.route.js");
 const itemRequestRoutes = require("./routes/ItemRequest.route.js");
 const userRoutes = require("./routes/user.route.js"); // ✅ only once
-const reportRoutes = require("./routes/report.route.js"); // ✅ Added report routes
+const reportRoutes = require("./routes/report.route.js"); 
+const exploreRoutes = require('./routes/Explore.route')// ✅ Added report routes
 
 const Message = require("./models/Message.model");
 
@@ -68,7 +69,8 @@ app.use("/api/search", searchRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/requests", itemRequestRoutes);
 app.use("/api/users", userRoutes); // ✅ FIXED
-app.use("/api/reports", reportRoutes); // ✅ Mounted the report routes
+app.use("/api/reports", reportRoutes); 
+app.use('/api/items', exploreRoutes);// ✅ Mounted the report routes
 
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
