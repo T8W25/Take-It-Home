@@ -1,101 +1,95 @@
+/* Container with soft glow and rounded edges */
 .post-donation-container {
-    max-width: 800px;
+    max-width: 700px;
     margin: 3rem auto;
     padding: 2.5rem;
-    background: linear-gradient(145deg, #2a2a72, #009ffd);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     border-radius: 20px;
-    box-shadow:
-      0 10px 25px rgba(0, 0, 0, 0.4),
-      0 0 10px rgba(0, 191, 255, 0.3),
-      inset 0 0 20px rgba(0, 191, 255, 0.2);
-    transition: transform 0.4s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
   }
   
-  .post-donation-container:hover {
-    transform: translateY(-6px);
-    box-shadow:
-      0 15px 30px rgba(0, 0, 0, 0.6),
-      0 0 20px rgba(0, 191, 255, 0.4),
-      inset 0 0 30px rgba(0, 191, 255, 0.3);
-  }
-  
+  /* Title with underline animation */
   .post-donation-title {
-    font-size: 2.2rem;
+    font-size: 2rem;
     text-align: center;
-    color: #ffffff;
-    text-shadow: 0 0 8px #00c3ff;
-    margin-bottom: 2rem;
+    font-weight: 700;
+    color: #333;
     position: relative;
+    margin-bottom: 2rem;
   }
   
   .post-donation-title::after {
-    content: '';
-    display: block;
+    content: "";
     width: 80px;
     height: 3px;
-    background: #00c3ff;
-    margin: 12px auto 0;
-    border-radius: 50%;
-    filter: blur(1px);
+    background: #ff4e50;
+    border-radius: 50px;
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
   }
   
+  /* Input styling */
   .form-label-glow {
-    color: #ffffff;
-    font-weight: 500;
+    font-weight: 600;
+    color: #444;
     margin-bottom: 8px;
-    display: block;
-    text-shadow: 0 0 6px #00c3ff;
   }
   
   .form-control-glow,
   .form-select-glow {
-    background-color: rgba(10, 25, 47, 0.85);
-    color: #ffffff;
-    border: 1px solid rgba(0, 255, 255, 0.2);
+    background-color: #f3f8ff;
+    border: none;
     border-radius: 10px;
     padding: 12px;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease;
   }
   
   .form-control-glow:focus,
   .form-select-glow:focus {
     outline: none;
-    border-color: #00c3ff;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    border: 1px solid #ffa07a;
+    box-shadow: 0 0 0 2px rgba(255, 160, 122, 0.4);
   }
   
+  /* File input */
   .file-input-glow {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 255, 255, 0.2);
-    width: 100%;
-  }
-  
-  .submit-btn-glow {
-    background: linear-gradient(to right, #00c3ff, #00b4d8);
-    color: #0a192f;
-    padding: 12px;
+    background: #f3f8ff;
     border: none;
     border-radius: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: 0.3s ease;
-    box-shadow: 0 5px 20px rgba(0, 191, 255, 0.3);
+    padding: 12px;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Submit button with gradient */
+  .submit-btn-glow {
+    background: linear-gradient(to right, #ff416c, #ffce00);
+    color: white;
+    font-weight: bold;
+    border: none;
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: transform 0.2s ease;
   }
   
   .submit-btn-glow:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 191, 255, 0.5);
+    box-shadow: 0 6px 20px rgba(255, 105, 135, 0.4);
   }
   
+  /* Alert styling */
   .alert-custom {
-    background-color: rgba(10, 25, 47, 0.9);
-    color: white;
-    border-left: 5px solid #00c3ff;
+    background-color: rgba(255, 230, 230, 0.9);
+    border-left: 5px solid #ff4e50;
+    color: #333;
+    font-weight: 500;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    margin-bottom: 1.5rem;
   }
   
