@@ -12,7 +12,7 @@ function TradeRequestNotifications() {
 
   const fetchTradeRequests = async () => {
     try {
-      const response = await fetch("https://take-it-home-8ldm.onrender.com/api/trade-requests");
+      const response = await fetch("http://localhost:3002/api/trade-requests");
       if (!response.ok) throw new Error("Failed to fetch trade requests");
       const data = await response.json();
       setRequests(data);
@@ -28,7 +28,7 @@ function TradeRequestNotifications() {
 
   const handleResponse = async (requestId, status) => {
     try {
-      const response = await fetch(`https://take-it-home-8ldm.onrender.com/api/trade-requests/${requestId}`, {
+      const response = await fetch(`http://localhost:3002/api/trade-requests/${requestId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),

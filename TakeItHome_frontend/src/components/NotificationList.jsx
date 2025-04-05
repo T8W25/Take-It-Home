@@ -8,7 +8,7 @@ const NotificationList = ({ userId }) => {
     if (!userId) return;
 
     axios
-      .get(`https://take-it-home-8ldm.onrender.com/api/notifications/${userId}`)
+      .get(`http://localhost:3002/api/notifications/${userId}`)
       .then((res) => setNotifications(res.data))
       .catch((err) => console.error('❌ Fetch failed:', err));
   }, [userId]);
