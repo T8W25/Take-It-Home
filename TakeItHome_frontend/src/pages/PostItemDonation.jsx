@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Button, Container, Row, Col, Alert, Card } from "react-bootstrap";
+import { Button, Container, Alert, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import "./PostItemDonation.css"; // ✅ make sure this is included
 
 function PostItemDonation() {
   const [items, setItems] = useState([]);
@@ -38,60 +39,49 @@ function PostItemDonation() {
     }
   };
 
-  const handleEdit = (item) => {
-    // Placeholder if you add edit form back
-  };
-
   return (
-    <Container fluid className="mt-5">
+    <Container className="donation-container">
+      <h3 className="donation-title">Posted Donation Items</h3>
+
       {message && (
-        <Row className="justify-content-center">
-          <Col md={8}>
-            <Alert variant={message.type}>{message.text}</Alert>
-          </Col>
-        </Row>
+        <Alert variant={message.type} className="mb-4">
+          {message.text}
+        </Alert>
       )}
 
-      <Row>
-        <Col md={12}>
-          <h3 className="text-center mb-4">Posted Donation Items</h3>
-          <Row>
-            {items.map((item) => (
-              <Col md={4} key={item._id} className="mb-4">
-                <Link to={`/donate/${item._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Card>
-                    {item.imageUrl && (
-                      <Card.Img variant="top" src={`http://localhost:3002${item.imageUrl}`} style={{ maxHeight: "200px", objectFit: "cover" }} />
-                    )}
-                    {!item.imageUrl && item.videoUrl && (
-                      <video controls style={{ width: "100%", maxHeight: "200px", objectFit: "cover" }}>
-                        <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
-                      </video>
-                    )}
-                    <Card.Body>
-                      <Card.Title>{item.title}</Card.Title>
-                      <Card.Text>{item.description}</Card.Text>
-                      <Card.Text>
-                        <strong>Category:</strong> {item.category} <br />
-                        <strong>Condition:</strong> {item.condition} <br />
-                        <strong>Location:</strong> {item.location}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Link>
+      <div className="donation-grid">
+        {items.map((item) => (
+          <div className="donation-card" key={item._id}>
+            <Link to={`/donate/${item._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              {item.imageUrl && (
+                <Card.Img variant="top" src={`http://localhost:3002${item.imageUrl}`} />
+              )}
+              {!item.imageUrl && item.videoUrl && (
+                <video controls>
+                  <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                </video>
+              )}
+              <Card.Body>
+                <Card.Title>{item.title}</Card.Title>
+                <Card.Text>{item.description}</Card.Text>
+                <Card.Text>
+                  <strong>Category:</strong> {item.category} <br />
+                  <strong>Condition:</strong> {item.condition} <br />
+                  <strong>Location:</strong> {item.location}
+                </Card.Text>
+              </Card.Body>
+            </Link>
 
-                <div className="d-flex justify-content-between mt-2">
-                  <Button variant="warning" onClick={() => handleEdit(item)} className="me-2">Edit</Button>
-                  <Button variant="danger" onClick={() => handleDelete(item._id)} className="me-2">Delete</Button>
-                  <Link to={`/report/${item._id}`} style={{ textDecoration: 'none' }}>
-                    <Button variant="info" className="w-auto">Report</Button>
-                  </Link>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </Col>
-      </Row>
+            <div className="card-actions">
+              <Button variant="warning" size="sm">Edit</Button>
+              <Button variant="danger" size="sm" onClick={() => handleDelete(item._id)}>Delete</Button>
+              <Link to={`/report/${item._id}`}>
+                <Button variant="info" size="sm">Report</Button>
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
     </Container>
   );
 }
