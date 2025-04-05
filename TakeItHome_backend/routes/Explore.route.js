@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const DonationItem = require('../models/DonationItem.model');
-const TradeItem = require('../models/TradeItem.model');
+const TradeItem = require('../models/tradeItem.model');
 
 // GET /api/items - combine donation and trade items
 router.get('/', async (req, res) => {
@@ -14,8 +14,9 @@ router.get('/', async (req, res) => {
       _id: item._id,
       title: item.title,
       description: item.description,
-      image: item.image,
-      type: item.category ? 'donate' : 'trade' // or adjust based on your model
+      imageUrl: item.imageUrl || null,
+      imageBase64: item.imageBase64 || null,
+      type: item.category ? 'donate' : 'trade'
     }));
 
     res.json(allItems);

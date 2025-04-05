@@ -1,95 +1,121 @@
 .explore-container {
-    padding: 30px 50px;
-    background: #f8f9fd;
-    min-height: 100vh;
-  }
-  
-  .explore-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 25px;
-    text-align: center;
-    color: #24243e;
-  }
-  
-  .explore-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 25px;
-  }
-  
-  .item-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .item-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  }
-  
-  .item-image {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    border-radius: 10px;
-  }
-  
-  .item-title {
-    font-size: 1.2rem;
-    margin-top: 10px;
-    font-weight: 600;
-    color: #302b63;
-  }
-  
-  .item-description {
-    font-size: 0.95rem;
-    color: #555;
-    margin: 8px 0 10px;
-  }
-  
-  .item-tag {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: inline-block;
-    margin-bottom: 10px;
-    text-transform: capitalize;
-  }
-  
-  .item-tag.trade {
-    background-color: #e0f7fa;
-    color: #00796b;
-  }
-  
-  .item-tag.donate {
-    background-color: #fce4ec;
-    color: #c2185b;
-  }
-  
-  .view-button {
-    background: linear-gradient(135deg, #00d4ff, #ff2d75);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 25px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s ease;
-    width: 100%;
-  }
-  
-  .view-button:hover {
-    background: linear-gradient(135deg, #00bcd4, #e91e63);
-  }
-  
-  .no-items {
-    text-align: center;
-    font-size: 1.1rem;
-    color: #888;
-  }
-  
+  padding: 40px 20px;
+  background: #f8f9fd;
+  min-height: 100vh;
+}
+
+.explore-title {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 30px;
+  color: #1c1b33;
+}
+
+.explore-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.item-card {
+  width: 280px;
+  min-height: 400px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.item-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background-color: #eee;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.item-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1b33;
+  margin-bottom: 8px;
+}
+
+.item-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.item-tag {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  width: fit-content;
+  margin-bottom: 15px;
+}
+
+.item-tag.donate {
+  background: #ffe4ea;
+  color: #e63946;
+}
+
+.item-tag.trade {
+  background: #e0f7ff;
+  color: #0077b6;
+}
+
+.view-button {
+  padding: 10px;
+  background: linear-gradient(to right, #00c6ff, #bc00dd);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.view-button:hover {
+  opacity: 0.9;
+}
+.item-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background-color: transparent;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  display: block;
+}
+.item-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.no-image {
+  width: 100%;
+  height: 200px;
+  background-color: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: gray;
+  border-radius: 10px;
+}

@@ -7,53 +7,43 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 
-const app = express(); // ✅ Moved before usage
-const PORT = process.env.PORT || 3000;
+const app = express();
+const PORT = process.env.PORT || 3002;
 
-// ✅ Determine the front-end URL based on the environment
-const frontendUrl = process.env.NODE_ENV === 'production' ? 'https://take-it-home-1.onrender.com' : 'http://localhost:5173';
+// ✅ Frontend URL: dev vs prod
+const frontendUrl = process.env.NODE_ENV === 'production'
+  ? 'https://take-it-home-1.onrender.com'
+  : 'http://localhost:5173';
 
-// ✅ Create server & socket.io
+// ✅ Setup Socket server
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: frontendUrl,  // ✅ Dynamically set based on environment
+    origin: frontendUrl,
     methods: ["GET", "POST"]
   }
 });
 
-// ✅ Import Routes
-const authRoutes = require("./routes/auth.route.js");
-const tradeItemRoutes = require("./routes/TradeItem.route.js");
-const donationItemRoutes = require("./routes/DonationItem.route.js");
-const searchRoutes = require("./routes/search.route.js");
-const chatRoutes = require("./routes/chat.route.js");
-const itemRequestRoutes = require("./routes/ItemRequest.route.js");
-const userRoutes = require("./routes/user.route.js"); // ✅ only once
-const reportRoutes = require("./routes/report.route.js"); 
-const exploreRoutes = require('./routes/Explore.route')// ✅ Added report routes
-
-const Message = require("./models/Message.model");
-
-console.log("DEBUG: MONGO_URI =", process.env.MONGO_URI);
-if (!process.env.MONGO_URI) {
-  console.error("❌ ERROR: MONGO_URI is not defined in .env file.");
-  process.exit(1);
-}
-
-// ✅ Middlewares
+// ✅ Middleware for parsing and CORS
 app.use(cors({
-  origin: frontendUrl,  // ✅ Dynamically set based on environment
+  origin: frontendUrl,
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
   allowedHeaders: "Content-Type,Authorization"
 }));
-
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // For parsing URL-encoded form data
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.urlencoded({ extended: true }));
 
-// ✅ MongoDB connection
+// ✅ Serving image/video uploads
+const uploadsPath = path.join(__dirname, "uploads");
+app.use("/uploads", express.static(uploadsPath));
+console.log("✅ Serving static files from:", uploadsPath);
+
+// ✅ Connect MongoDB
+if (!process.env.MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI not defined in .env");
+  process.exit(1);
+}
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => {
@@ -61,50 +51,48 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
-// ✅ Mount Routes
-app.use("/api/auth", authRoutes); // ✅ Includes password recovery routes
-app.use("/api/trade-items", tradeItemRoutes);
-app.use("/api/donation-items", donationItemRoutes);
-app.use("/api/search", searchRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/requests", itemRequestRoutes);
-app.use("/api/users", userRoutes); // ✅ FIXED
-app.use("/api/reports", reportRoutes); 
-app.use('/api/items', exploreRoutes);// ✅ Mounted the report routes
+// ✅ Import & use routes
+app.use("/api/auth", require("./routes/auth.route.js"));
+app.use("/api/trade-items", require("./routes/TradeItem.route.js"));
+app.use("/api/donation-items", require("./routes/DonationItem.route.js"));
+app.use("/api/search", require("./routes/search.route.js"));
+app.use("/api/chat", require("./routes/chat.route.js"));
+app.use("/api/requests", require("./routes/ItemRequest.route.js"));
+app.use("/api/users", require("./routes/user.route.js"));
+app.use("/api/reports", require("./routes/report.route.js"));
+app.use("/api/items", require("./routes/Explore.route.js")); // 🌟 Used in Explore.jsx
 
+// ✅ Root route
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
 });
 
-// ✅ Socket.IO Events
+// ✅ Socket.io messaging logic
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
+  console.log("🔌 Connected:", socket.id);
   socket.on("send_message", async (data) => {
     try {
-      const savedMessage = await createMessage(data); // Use the controller function
-      io.emit("receive_message", savedMessage); // Emit the populated message
+      const savedMessage = await createMessage(data); // must exist
+      io.emit("receive_message", savedMessage);
     } catch (err) {
       console.error("Message save error:", err.message);
     }
   });
-
-  // Optionally, you can handle other socket events related to reports or trade messaging
 });
 
-// ✅ Start server
+// ✅ Start the backend server
 server.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 
-// ✅ Handle unhandled rejections
+// ✅ Handle unhandled errors
 process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Rejection:", err.message);
   server.close(() => process.exit(1));
 });
 
-// Debug middleware execution
+// ✅ Debug log for every request
 app.use((req, res, next) => {
-  console.log("Middleware executed. Request Body:", req.body);
+  console.log(`👉 [${req.method}] ${req.url}`);
   next();
 });

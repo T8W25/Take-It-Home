@@ -7,12 +7,12 @@ const tradeItemSchema = new mongoose.Schema(
     condition: { type: String, required: true },
     description: { type: String, required: true },
     location: { type: String, required: true },
-    imageUrl: { type: String },
+    imageBase64: { type: String }, // ✅ base64 encoded image
     videoUrl: { type: String },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
   },
   { timestamps: true }
 );
 
-// ✅ FIX: Only register the model once
+// ✅ Fix: prevent OverwriteModelError during dev hot reload
 module.exports = mongoose.models.TradeItem || mongoose.model("TradeItem", tradeItemSchema);

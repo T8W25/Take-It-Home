@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Spinner, Button } from 'react-bootstrap';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+
 const DonationItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ const DonationItemDetail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/donation-items/${id}`);
+        const res = await fetch(`${API_BASE}/api/donation-items/${id}`);
         if (!res.ok) throw new Error("Failed to fetch item");
         const data = await res.json();
         setItem(data);
@@ -32,18 +34,28 @@ const DonationItemDetail = () => {
     <Container className="mt-5">
       <h3 className="text-center mb-4">Donation Listing Details</h3>
       <Card>
-        {item.imageUrl && (
+        {item.imageBase64 ? (
           <Card.Img
             variant="top"
-            src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
+            src={item.imageBase64}
             style={{ maxHeight: "400px", objectFit: "cover" }}
           />
+        ) : item.imageUrl ? (
+          <Card.Img
+            variant="top"
+            src={`${API_BASE}${item.imageUrl}`}
+            style={{ maxHeight: "400px", objectFit: "cover" }}
+          />
+        ) : (
+          <Card.Text className="text-center p-4 text-muted">No Image</Card.Text>
         )}
+
         {item.videoUrl && (
           <video controls style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}>
-            <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+            <source src={`${API_BASE}${item.videoUrl}`} type="video/mp4" />
           </video>
         )}
+
         <Card.Body>
           <Card.Title>{item.title}</Card.Title>
           <Card.Text><strong>Description:</strong> {item.description}</Card.Text>

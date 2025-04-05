@@ -1,3 +1,4 @@
+const fs = require("fs");
 const TradeItem = require("../models/tradeItem.model");
 
 // ✅ GET: All trade items with user info
@@ -11,15 +12,21 @@ const getTradeItems = async (req, res) => {
   }
 };
 
+
+
 const createTradeItem = async (req, res) => {
   try {
     const { title, category, condition, description, location } = req.body;
-    const imageUrl = req.files?.image?.[0] ? `/uploads/${req.files.image[0].filename}` : null;
-    const videoUrl = req.files?.video?.[0] ? `/uploads/${req.files.video[0].filename}` : null;
+    const imageFile = req.files?.image?.[0];
 
-    if (!title || !category || !condition || !description || !location || (!imageUrl && !videoUrl)) {
-      return res.status(400).json({ message: "All fields and at least one media are required." });
+    if (!title || !category || !condition || !description || !location || !imageFile) {
+      return res.status(400).json({ message: "All fields including an image are required." });
     }
+
+    const imageBuffer = fs.readFileSync(imageFile.path);
+    const imageBase64 = imageBuffer.toString("base64");
+    const mimeType = imageFile.mimetype;
+    const base64String = `data:${mimeType};base64,${imageBase64}`;
 
     const newItem = new TradeItem({
       title,
@@ -27,12 +34,12 @@ const createTradeItem = async (req, res) => {
       condition,
       description,
       location,
-      imageUrl,
-      videoUrl,
-      userId: req.user.id
+      imageBase64: base64String, // ✅ saving base64 string
+      userId: req.user.id,
     });
 
     await newItem.save();
+    fs.unlinkSync(imageFile.path); // ✅ delete after encoding
     res.status(201).json({ message: "Trade item created", tradeItem: newItem });
   } catch (error) {
     console.error("❌ Create Trade Error:", error);
@@ -40,6 +47,8 @@ const createTradeItem = async (req, res) => {
   }
 };
 
+
+// ✅ PUT: Update existing trade item with base64 image support
 const updateTradeItem = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);
@@ -58,10 +67,9 @@ const updateTradeItem = async (req, res) => {
     };
 
     if (req.files?.image?.[0]) {
-      updates.imageUrl = `/uploads/${req.files.image[0].filename}`;
-    }
-    if (req.files?.video?.[0]) {
-      updates.videoUrl = `/uploads/${req.files.video[0].filename}`;
+      const imageBuffer = fs.readFileSync(req.files.image[0].path);
+      updates.imageBase64 = `data:${req.files.image[0].mimetype};base64,${imageBuffer.toString("base64")}`;
+      fs.unlinkSync(req.files.image[0].path);
     }
 
     const updatedItem = await TradeItem.findByIdAndUpdate(req.params.id, updates, {
@@ -76,6 +84,7 @@ const updateTradeItem = async (req, res) => {
   }
 };
 
+// ✅ DELETE: Remove trade item
 const deleteTradeItem = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);
@@ -93,6 +102,7 @@ const deleteTradeItem = async (req, res) => {
   }
 };
 
+// ✅ GET: Search trade items
 const searchTradeItems = async (req, res) => {
   try {
     const { q, category, location } = req.query;
@@ -113,6 +123,7 @@ const searchTradeItems = async (req, res) => {
   }
 };
 
+// ✅ GET: Single item by ID
 const getTradeItemById = async (req, res) => {
   try {
     const item = await TradeItem.findById(req.params.id);

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Spinner, Button, Form, Modal, Alert } from 'react-bootstrap';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+
 const TradeItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const TradeItemDetail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/trade-items/${id}`);
+        const res = await fetch(`${API_BASE}/api/trade-items/${id}`);
         if (!res.ok) throw new Error("Failed to fetch item");
         const data = await res.json();
         setItem(data);
@@ -39,8 +41,9 @@ const TradeItemDetail = () => {
       return;
     }
 
-    console.log("✅ Request sent with details:");
-    console.log({ itemId: item._id, name, email, phoneNumber, message });
+    console.log("✅ Request sent with details:", {
+      itemId: item._id, name, email, phoneNumber, message
+    });
 
     setRequestStatus({ type: 'success', text: 'Your request has been sent successfully!' });
     setShowModal(false);
@@ -54,18 +57,22 @@ const TradeItemDetail = () => {
     <Container className="mt-5">
       <h3 className="text-center mb-4">Trade Listing Details</h3>
       <Card>
-        {item.imageUrl && (
+        {item.imageBase64 ? (
           <Card.Img
             variant="top"
-            src={`http://localhost:3002${item.imageUrl}`}
+            src={item.imageBase64}
             style={{ maxHeight: "400px", objectFit: "cover" }}
           />
+        ) : (
+          <div className="text-center p-4 text-muted">No Image Available</div>
         )}
+
         {item.videoUrl && (
           <video controls style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}>
-            <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+            <source src={`${API_BASE}${item.videoUrl}`} type="video/mp4" />
           </video>
         )}
+
         <Card.Body>
           <Card.Title>{item.title}</Card.Title>
           <Card.Text><strong>Description:</strong> {item.description}</Card.Text>
