@@ -21,7 +21,7 @@ function SearchResults() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await axios.get("https://take-it-home-8ldm.onrender.com/api/search", {
+        const response = await axios.get("http://localhost:3002/api/search", {
           params: {
             q: keyword,
             type: filters.type,
@@ -114,13 +114,13 @@ function SearchResults() {
                       {item.imageUrl && (
                         <Card.Img
                           variant="top"
-                          src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
+                          src={`http://localhost:3002${item.imageUrl}`}
                           style={{ height: "200px", objectFit: "cover" }}
                         />
                       )}
                       {!item.imageUrl && item.videoUrl && (
                         <video controls style={{ width: "100%", height: "200px", objectFit: "cover" }}>
-                          <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
+                          <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
                         </video>
                       )}
                       <Card.Body>
