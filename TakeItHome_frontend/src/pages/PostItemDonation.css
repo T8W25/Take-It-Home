@@ -1,0 +1,106 @@
+/* Container */
+.donation-container {
+    padding: 3rem 2rem;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+  
+  /* Title */
+  .donation-title {
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #0077ff;
+    position: relative;
+  }
+  
+  .donation-title::after {
+    content: "";
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #0077ff, #00a1ff);
+    margin: 10px auto 0;
+    border-radius: 50%;
+  }
+  
+  /* Grid */
+  .donation-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: space-between;
+  }
+  
+  /* Each Card */
+  .donation-card {
+    flex: 0 0 calc(25% - 1.2rem); /* 4 items per row */
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+  }
+  
+  /* Hover Effect */
+  .donation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Media Display */
+  .donation-card img,
+  .donation-card video {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Card Body */
+  .donation-card .card-body {
+    padding: 1rem;
+    flex-grow: 1;
+  }
+  
+  .donation-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .donation-card .card-text {
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  /* Action Buttons */
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.4rem;
+    padding: 0.75rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .donation-card {
+      flex: 0 0 calc(33.333% - 1rem); /* 3 in a row */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .donation-card {
+      flex: 0 0 calc(50% - 1rem); /* 2 in a row */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .donation-card {
+      flex: 0 0 100%; /* 1 in a row */
+    }
+  }
+  
