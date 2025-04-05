@@ -1,14 +1,16 @@
+/* Container */
 .donation-container {
-    padding: 3rem 2rem 6rem;
-    max-width: 1400px;
+    padding: 3rem 2rem;
+    max-width: 1300px;
     margin: 0 auto;
   }
   
+  /* Title */
   .donation-title {
     font-size: 2rem;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     color: #0077ff;
     position: relative;
   }
@@ -23,30 +25,33 @@
     border-radius: 50%;
   }
   
-  /* Grid layout for 4 cards in a row */
+  /* Grid */
   .donation-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: space-between;
   }
   
-  /* Card Styling */
+  /* Each Card */
   .donation-card {
-    background: white;
+    flex: 0 0 calc(25% - 1.2rem); /* 4 items per row */
     border: 1px solid #eee;
     border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    height: 100%;
+    background: #fff;
   }
   
+  /* Hover Effect */
   .donation-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
   
+  /* Media Display */
   .donation-card img,
   .donation-card video {
     width: 100%;
@@ -55,9 +60,10 @@
     border-bottom: 1px solid #ddd;
   }
   
+  /* Card Body */
   .donation-card .card-body {
-    flex-grow: 1;
     padding: 1rem;
+    flex-grow: 1;
   }
   
   .donation-card .card-title {
@@ -71,11 +77,30 @@
     color: #333;
   }
   
-  /* Button Group */
+  /* Action Buttons */
   .card-actions {
     display: flex;
     justify-content: space-between;
     gap: 0.4rem;
-    padding: 0.8rem 1rem;
+    padding: 0.75rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .donation-card {
+      flex: 0 0 calc(33.333% - 1rem); /* 3 in a row */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .donation-card {
+      flex: 0 0 calc(50% - 1rem); /* 2 in a row */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .donation-card {
+      flex: 0 0 100%; /* 1 in a row */
+    }
   }
   
