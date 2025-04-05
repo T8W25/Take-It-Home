@@ -11,7 +11,8 @@ const {
   updateDonationItem,
   deleteDonationItem,
   searchDonationItems,
-  getDonationItemById
+  getDonationItemById,
+  getMyDonationItems
 } = require("../controllers/donationItem.controller");
 
 // ✅ ROUTES
@@ -40,5 +41,7 @@ router.delete("/delete/:id", verifyToken, deleteDonationItem);
 // Search or get by ID
 router.get("/search", searchDonationItems);
 router.get("/:id", getDonationItemById);
+
+router.get("/my-posts", verifyToken, getMyDonationItems);
 
 module.exports = router;

@@ -13,7 +13,6 @@ const getTradeItems = async (req, res) => {
 };
 
 
-
 const createTradeItem = async (req, res) => {
   try {
     const { title, category, condition, description, location } = req.body;
@@ -134,11 +133,23 @@ const getTradeItemById = async (req, res) => {
   }
 };
 
+// TradeItem.controller.js
+const getMyTradeItems = async (req, res) => {
+  try {
+    const items = await TradeItem.find({ userId: req.user.id }); // Match model field
+    console.log("Fetched My Trade Items:", items); // Debug log
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   getTradeItems,
   createTradeItem,
   updateTradeItem,
   deleteTradeItem,
   searchTradeItems,
-  getTradeItemById
+  getTradeItemById,
+  getMyTradeItems
 };

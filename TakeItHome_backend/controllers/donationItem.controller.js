@@ -117,6 +117,19 @@ const searchDonationItems = async (req, res) => {
   }
 };
 
+// DonationItem.controller.js
+const getMyDonationItems = async (req, res) => {
+  try {
+    const items = await DonationItem.find({ userId: req.user.id }); // Match model field
+    console.log("Fetched My Donation Items:", items); // Debug log
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+
 module.exports = {
   getDonationItems,
   getDonationItemById,
@@ -124,4 +137,5 @@ module.exports = {
   updateDonationItem,
   deleteDonationItem,
   searchDonationItems,
+  getMyDonationItems
 };

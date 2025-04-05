@@ -10,6 +10,7 @@ const {
   deleteTradeItem,
   searchTradeItems,
   getTradeItemById,
+  getMyTradeItems
 } = require("../controllers/tradeItem.controller");
 
 // ✅ Multer Setup
@@ -27,6 +28,7 @@ const upload = multer({ storage });
 router.get("/all", getTradeItems);
 router.get("/search", searchTradeItems);
 router.get("/:id", getTradeItemById);
+router.get("/my-posts", verifyToken, getMyTradeItems);
 
 router.post(
   "/post",

@@ -7,6 +7,7 @@ import PostItemDonation from "../components/PostItemDonation";
 import Profile from "../components/Profile";
 import Messages from "../components/Messages";
 import Notifications from "../components/Notifications";
+import MyPosts from "./MyPosts";
 
 const Account = () => {
   return (
@@ -18,8 +19,13 @@ const Account = () => {
       <Route path="/donate-item" element={<PostItemDonation />} />
       {/* fallback */}
       <Route path="*" element={<Navigate to="/profile" />} />
+      <Route path="/my-posts" element={<MyPosts />} />
     </Routes>
   );
 };
 
 export default Account;
+
+      {/* Fallback (if no route matches, redirect to profile) */}
+
+      {/* My Posts page */}
