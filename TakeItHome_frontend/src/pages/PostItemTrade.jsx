@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Container, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "./PostItemTrade.css"; // ✅ import the shared CSS file
+import "./PostItemTrade.css";
 
 function PostItemTrade() {
   const [items, setItems] = useState([]);
@@ -66,7 +66,7 @@ function PostItemTrade() {
             <div className="card-actions">
               <Button variant="warning" onClick={() => alert("Edit feature coming soon")}>Edit</Button>
               <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
-              <Link to={`/report/${item._id}`}>
+              <Link to={`/report-trade/${item._id}`}>
                 <Button variant="info">Report</Button>
               </Link>
             </div>

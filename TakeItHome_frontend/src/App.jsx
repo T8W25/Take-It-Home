@@ -20,7 +20,9 @@ import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ReportPage from './pages/ReportPage';
+import ReportTrade from './pages/ReportTrade'; // ✅ NEW IMPORT
 import MyPosts from './pages/MyPosts';
+
 // ✅ Newly cleaned-up listing-only pages
 import PostItemTrade from './pages/PostItemTrade';
 import PostItemDonation from './pages/PostItemDonation';
@@ -50,6 +52,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/report/:id" element={<ReportPage />} />
+        <Route path="/report-trade/:id" element={<ReportTrade />} /> {/* ✅ NEW ROUTE */}
 
         {/* ✅ View posted listings only */}
         <Route path="/trade-item" element={<PostItemTrade />} />
