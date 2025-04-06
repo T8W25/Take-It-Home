@@ -16,27 +16,29 @@ function ReportTrade() {
     const token = localStorage.getItem("jwtToken");
 
     try {
-      const response = await fetch("http://localhost:3002/api/reports/trade", {
+      const response = await fetch(`http://localhost:3002/api/reports/report/${id}`, { // Adjust the API URL to match the backend
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          itemId: id,
           reason,
           details,
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to submit report");
+      if (!response.ok) {
+        const errMessage = await response.json(); // Get error message from the backend response
+        throw new Error(errMessage.message || "Failed to submit report");
+      }
 
       setSuccess(true);
       setReason("");
       setDetails("");
-      setTimeout(() => navigate("/trade-item"), 2000);
+      setTimeout(() => navigate("/my-posts"), 2000); // Redirect to MyPosts or a different page
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(err.message || "Something went wrong. Please try again.");
     }
   };
 

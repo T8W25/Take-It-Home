@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-const { createMessage } = require("./controllers/chat.controller");  
+const { createMessage } = require("./controllers/chat.controller");
 const app = express();
 const PORT = process.env.PORT || 3002;
 
@@ -59,11 +59,10 @@ app.use("/api/search", require("./routes/search.route.js"));
 app.use("/api/chat", require("./routes/chat.route.js"));
 app.use("/api/requests", require("./routes/ItemRequest.route.js"));
 app.use("/api/users", require("./routes/user.route.js"));
-app.use("/api/reports", require("./routes/report.route.js"));
+app.use("/api/reports", require("./routes/reportTrade.routes.js"));  // ✅ Corrected route for reports
 app.use("/api/items", require("./routes/Explore.route.js")); // 🌟 Used in Explore.jsx
+
 // ✅ Root route
-
-
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
 });
