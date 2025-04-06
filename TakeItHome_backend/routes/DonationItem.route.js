@@ -1,10 +1,7 @@
-// ✅ Final: DonationItem.route.js
 const express = require("express");
 const router = express.Router();
-
 const { verifyToken } = require("../middleware/authmiddleware");
 const upload = require("../middleware/multer.middleware");
-
 const {
   getDonationItems,
   createDonationItem,
@@ -12,14 +9,14 @@ const {
   deleteDonationItem,
   searchDonationItems,
   getDonationItemById,
-  getMyDonationItems
+  getDonationItemsByUser
 } = require("../controllers/donationItem.controller");
 
-// ✅ ROUTES
-
-
-// Get all donation items
+// ✅ Get all donation items
 router.get("/all", getDonationItems);
+
++// ✅ Get only the logged‑in user’s donation items
++router.get("/user", verifyToken, getDonationItemsByUser);
 
 // Create a new donation item with image/video
 router.post(
@@ -40,8 +37,10 @@ router.delete("/delete/:id", verifyToken, deleteDonationItem);
 
 // Search or get by ID
 router.get("/search", searchDonationItems);
-router.get("/:id", getDonationItemById);
 
-router.get("/my-posts", verifyToken, getMyDonationItems);
+-// This was catching “user” as an ID
+-// router.get("/:id", getDonationItemById);
++// ✅ Get donation item by its ID
++router.get("/:id", getDonationItemById);
 
 module.exports = router;

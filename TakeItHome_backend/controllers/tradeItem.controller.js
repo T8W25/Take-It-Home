@@ -144,6 +144,20 @@ const getMyTradeItems = async (req, res) => {
   }
 };
 
+// ✅ New: fetch only the logged‑in user’s trade items
+const getTradeItemsByUser = async (req, res) => {
+  try {
+    const items = await TradeItem
+      .find({ userId: req.user.id })
+      .populate("userId", "username profileImage");
+    res.status(200).json(items);
+  } catch (error) {
+    console.error("❌ Fetch User Trade Items Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+
 module.exports = {
   getTradeItems,
   createTradeItem,
@@ -151,5 +165,6 @@ module.exports = {
   deleteTradeItem,
   searchTradeItems,
   getTradeItemById,
-  getMyTradeItems
+  getMyTradeItems,
+  getTradeItemsByUser
 };

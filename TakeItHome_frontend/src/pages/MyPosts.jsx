@@ -1,92 +1,83 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { API_BASE } from "../config";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const MyPosts = () => {
   const [tradeItems, setTradeItems] = useState([]);
   const [donationItems, setDonationItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchMyItems = async () => {
-      try {
-        const token = localStorage.getItem("jwtToken");
-        const headers = { Authorization: `Bearer ${token}` };
+    const token = localStorage.getItem("jwtToken");
+    const headers = { Authorization: `Bearer ${token}` };
 
-        // Fetch trade items
-        const tradeRes = await fetch(`${API_BASE}/api/trade-items/my-posts`, { headers });
-        if (!tradeRes.ok) throw new Error("Failed to fetch trade items");
-        const tradeData = await tradeRes.json();
-        console.log("Trade Items Response:", tradeData); // Debug log
-        setTradeItems(tradeData);
+    axios
+      .get("http://localhost:3002/api/trade-items/user", { headers })
+      .then(res => setTradeItems(res.data))
+      .catch(() => setError("Failed to load trade items"));
 
-        // Fetch donation items
-        const donationRes = await fetch(`${API_BASE}/api/donation-items/my-posts`, { headers });
-        if (!donationRes.ok) throw new Error("Failed to fetch donation items");
-        const donationData = await donationRes.json();
-        console.log("Donation Items Response:", donationData); // Debug log
-        setDonationItems(donationData);
-      } catch (err) {
-        console.error("Error:", err);
-        setError("Failed to load posts. Check console for details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMyItems();
+    axios
+      .get("http://localhost:3002/api/donation-items/user", { headers })
+      .then(res => setDonationItems(res.data))
+      .catch(() => setError("Failed to load donation items"));
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-
   return (
-    <Container className="mt-4">
-      {/* Trade Posts */}
-      <h3>My Trade Posts</h3>
-      {tradeItems.length === 0 && <p>No trade posts found.</p>}
-      <Row>
-        {tradeItems.map((item) => (
-          <Col md={4} key={item._id}>
-            <Card>
-              <Card.Img
-                variant="top"
-                src={item.imageBase64 ? item.imageBase64 : "/default-image.jpg"} // Handle missing images
-              />
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Button variant="primary">Edit</Button>
-                <Button variant="danger">Delete</Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+    <div className="container mt-4">
+      <h2>My Posts</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* Donation Posts */}
-      <h3 className="mt-5">My Donation Posts</h3>
-      {donationItems.length === 0 && <p>No donation posts found.</p>}
-      <Row>
-        {donationItems.map((item) => (
-          <Col md={4} key={item._id}>
-            <Card>
-              <Card.Img
-                variant="top"
-                src={item.imageUrl ? `${API_BASE}${item.imageUrl}` : "/default-image.jpg"} // Handle missing images
-              />
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text>{item.description}</Card.Text>
-                <Button variant="primary">Edit</Button>
-                <Button variant="danger">Delete</Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </Container>
+      <section>
+        <h3>Trade Listings</h3>
+        {tradeItems.length === 0 ? (
+          <p>No trade items posted yet.</p>
+        ) : (
+          <div className="row">
+            {tradeItems.map(item => (
+              <div className="col-md-4 mb-3" key={item._id}>
+                <div className="card">
+                  {item.imageBase64 && (
+                    <img src={item.imageBase64} className="card-img-top" alt={item.title} />
+                  )}
+                  <div className="card-body">
+                    <h5 className="card-title">{item.title}</h5>
+                    <p className="card-text">{item.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-4">
+        <h3>Donation Listings</h3>
+        {donationItems.length === 0 ? (
+          <p>No donation items posted yet.</p>
+        ) : (
+          <div className="row">
+            {donationItems.map(item => (
+              <div className="col-md-4 mb-3" key={item._id}>
+                <div className="card">
+                  {item.imageUrl && (
+                    <img
+                      src={`http://localhost:3002${item.imageUrl}`}
+                      className="card-img-top"
+                      alt={item.title}
+                    />
+                  )}
+                  <div className="card-body">
+                    <h5 className="card-title">{item.title}</h5>
+                    <p className="card-text">{item.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 };
 
 export default MyPosts;
+

@@ -61,8 +61,9 @@ app.use("/api/requests", require("./routes/ItemRequest.route.js"));
 app.use("/api/users", require("./routes/user.route.js"));
 app.use("/api/reports", require("./routes/report.route.js"));
 app.use("/api/items", require("./routes/Explore.route.js")); // 🌟 Used in Explore.jsx
-
 // ✅ Root route
+
+
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
 });

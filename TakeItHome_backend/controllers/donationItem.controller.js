@@ -128,7 +128,16 @@ const getMyDonationItems = async (req, res) => {
   }
 };
 
-
+// ✅ New: fetch only the logged‑in user’s donation items
+const getDonationItemsByUser = async (req, res) => {
+  try {
+    const items = await DonationItem.find({ userId: req.user.id });
+    res.status(200).json(items);
+  } catch (error) {
+    console.error("❌ Fetch User Donation Items Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 
 module.exports = {
   getDonationItems,
@@ -137,5 +146,6 @@ module.exports = {
   updateDonationItem,
   deleteDonationItem,
   searchDonationItems,
-  getMyDonationItems
+  getMyDonationItems,
+  getDonationItemsByUser
 };

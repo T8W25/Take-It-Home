@@ -20,7 +20,7 @@ import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ReportPage from './pages/ReportPage';
-
+import MyPosts from './pages/MyPosts';
 // ✅ Newly cleaned-up listing-only pages
 import PostItemTrade from './pages/PostItemTrade';
 import PostItemDonation from './pages/PostItemDonation';
@@ -54,6 +54,9 @@ function App() {
         {/* ✅ View posted listings only */}
         <Route path="/trade-item" element={<PostItemTrade />} />
         <Route path="/donate-item" element={<PostItemDonation />} />
+        
+        {/* ✅ My Posts page */}
+        <Route path="/my-posts" element={<MyPosts />} />
 
         {/* ✅ Forms for posting under account section */}
         <Route path="/account/post-trade" element={<PostTradeFromAccount />} />

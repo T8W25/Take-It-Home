@@ -77,7 +77,7 @@ const NavBar = () => {
                     <Link to="/profile">Profile</Link>
                     <Link to="/chat">Messages</Link>
                     <Link to="/notifications">Notifications</Link>
-                    <Link to="/account/my-posts">My Posts</Link>
+                    <Link to="/my-posts">My Posts</Link>
                     <Link to="/account/post-trade">Post Trade</Link>
                     <Link to="/account/post-donation">Post Donation</Link>
                     <hr className="dropdown-divider" />
