@@ -1,4 +1,5 @@
 // controllers/chat.controller.js
+const Message = require("../models/Message.model");
 exports.getConversations = async (req, res) => {
     try {
       const { userId } = req.params;
@@ -49,4 +50,18 @@ exports.getConversations = async (req, res) => {
       res.status(500).json({ message: "Failed to fetch chat history" });
     }
   };
+
+  // ✅ NEW: persist an incoming message
+exports.createMessage = async (data) => {
+  const { senderId, receiverId, content, itemId, itemType } = data;
+  const msg = new Message({
+    senderId,
+    receiverId,
+    content,
+    itemId,
+    itemModel: itemType === "trade" ? "TradeItem" : "DonationItem",
+    createdAt: new Date()
+  });
+  return await msg.save();
+};
   

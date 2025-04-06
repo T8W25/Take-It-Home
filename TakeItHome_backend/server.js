@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-
+const { createMessage } = require("./controllers/chat.controller");  
 const app = express();
 const PORT = process.env.PORT || 3002;
 
@@ -69,12 +69,36 @@ app.get("/", (req, res) => {
 });
 
 // ✅ Socket.io messaging logic
+// io.on("connection", (socket) => {
+//   console.log("🔌 Connected:", socket.id);
+//   socket.on("send_message", async (data) => {
+//     try {
+//       const savedMessage = await createMessage(data); // must exist
+//       io.emit("receive_message", savedMessage);
+//     } catch (err) {
+//       console.error("Message save error:", err.message);
+//     }
+//   });
+// });
+
 io.on("connection", (socket) => {
   console.log("🔌 Connected:", socket.id);
+
+  // Join the user to a room named by their userId
+  socket.on("join", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined their room`);
+  });
+
+  // When a message is sent
   socket.on("send_message", async (data) => {
     try {
-      const savedMessage = await createMessage(data); // must exist
-      io.emit("receive_message", savedMessage);
+      // Save to DB
+      const saved = await createMessage(data);
+
+      // Emit to both participants
+      io.to(data.receiverId).emit("receive_message", saved);
+      io.to(data.senderId).emit("receive_message", saved);
     } catch (err) {
       console.error("Message save error:", err.message);
     }
