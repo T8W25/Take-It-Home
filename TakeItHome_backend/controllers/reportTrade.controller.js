@@ -1,6 +1,6 @@
 const ReportTrade = require('../models/ReportTrade.model');
-const TradeItem = require('../models/TradeItem');  // Assuming you have a TradeItem model
-const User = require('../models/User');  // Assuming you have a User model
+const TradeItem = require('../models/tradeItem.model');  // Assuming you have a TradeItem model
+const User = require('../models/User.model');  // Assuming you have a User model
 
 // Report a trade item
 const reportTrade = async (req, res) => {

@@ -1,5 +1,5 @@
 const fs = require("fs");
-const TradeItem = require("../models/tradeItem.model");
+const TradeItem = require('../models/tradeItem.model');
 
 // ✅ GET: All trade items with user info
 const getTradeItems = async (req, res) => {
