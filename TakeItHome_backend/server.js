@@ -1,3 +1,127 @@
+// const path = require("path");
+// require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+
+// const express = require("express");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+// const http = require("http");
+// const { Server } = require("socket.io");
+// const { createMessage } = require("./controllers/chat.controller");
+// const app = express();
+// const PORT = process.env.PORT || 3002;
+
+// // ✅ Frontend URL: dev vs prod
+// const frontendUrl = process.env.NODE_ENV === 'production'
+//   ? 'https://take-it-home-1.onrender.com'
+//   : 'http://localhost:5173';
+
+// // ✅ Setup Socket server
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: frontendUrl,
+//     methods: ["GET", "POST"]
+//   }
+// });
+
+// // ✅ Middleware for parsing and CORS
+// app.use(cors({
+//   origin: frontendUrl,
+//   credentials: true,
+//   methods: "GET,POST,PUT,DELETE",
+//   allowedHeaders: "Content-Type,Authorization"
+// }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+
+// // ✅ Serving image/video uploads
+// const uploadsPath = path.join(__dirname, "uploads");
+// app.use("/uploads", express.static(uploadsPath));
+// console.log("✅ Serving static files from:", uploadsPath);
+
+// // ✅ Connect MongoDB
+// if (!process.env.MONGO_URI) {
+//   console.error("❌ ERROR: MONGO_URI not defined in .env");
+//   process.exit(1);
+// }
+// mongoose.connect(process.env.MONGO_URI)
+//   .then(() => console.log("✅ MongoDB Connected"))
+//   .catch((err) => {
+//     console.error("❌ MongoDB Connection Error:", err.message);
+//     process.exit(1);
+//   });
+
+// // ✅ Import & use routes
+// app.use("/api/auth", require("./routes/auth.route.js"));
+// app.use("/api/trade-items", require("./routes/TradeItem.route.js"));
+// app.use("/api/donation-items", require("./routes/DonationItem.route.js"));
+// app.use("/api/search", require("./routes/search.route.js"));
+// app.use("/api/chat", require("./routes/chat.route.js"));
+// app.use("/api/requests", require("./routes/ItemRequest.route.js"));
+// app.use("/api/users", require("./routes/user.route.js"));
+// app.use("/api/reports", require("./routes/reportTrade.routes.js"));  // ✅ Corrected route for reports
+// app.use("/api/items", require("./routes/Explore.route.js")); // 🌟 Used in Explore.jsx
+
+// // ✅ Root route
+// app.get("/", (req, res) => {
+//   res.send("🎉 TakeItHome API is running...");
+// });
+
+// // ✅ Socket.io messaging logic
+// // io.on("connection", (socket) => {
+// //   console.log("🔌 Connected:", socket.id);
+// //   socket.on("send_message", async (data) => {
+// //     try {
+// //       const savedMessage = await createMessage(data); // must exist
+// //       io.emit("receive_message", savedMessage);
+// //     } catch (err) {
+// //       console.error("Message save error:", err.message);
+// //     }
+// //   });
+// // });
+
+// io.on("connection", (socket) => {
+//   console.log("🔌 Connected:", socket.id);
+
+//   // Join the user to a room named by their userId
+//   socket.on("join", (userId) => {
+//     socket.join(userId);
+//     console.log(`User ${userId} joined their room`);
+//   });
+
+//   // When a message is sent
+//   socket.on("send_message", async (data) => {
+//     try {
+//       // Save to DB
+//       const saved = await createMessage(data);
+
+//       // Emit to both participants
+//       io.to(data.receiverId).emit("receive_message", saved);
+//       io.to(data.senderId).emit("receive_message", saved);
+//     } catch (err) {
+//       console.error("Message save error:", err.message);
+//     }
+//   });
+// });
+
+// // ✅ Start the backend server
+// server.listen(PORT, () => {
+//   console.log(`🚀 Server running on http://localhost:${PORT}`);
+// });
+
+// // ✅ Handle unhandled errors
+// process.on("unhandledRejection", (err) => {
+//   console.error("❌ Unhandled Rejection:", err.message);
+//   server.close(() => process.exit(1));
+// });
+
+// // ✅ Debug log for every request
+// app.use((req, res, next) => {
+//   console.log(`👉 [${req.method}] ${req.url}`);
+//   next();
+// });
+
+
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -10,40 +134,37 @@ const { createMessage } = require("./controllers/chat.controller");
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// ✅ Frontend URL: dev vs prod
+// Frontend URL configuration
 const frontendUrl = process.env.NODE_ENV === 'production'
   ? 'https://take-it-home-1.onrender.com'
   : 'http://localhost:5173';
 
-// ✅ Setup Socket server
+// Socket.IO server setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: frontendUrl,
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 
-// ✅ Middleware for parsing and CORS
+// Middleware setup
 app.use(cors({
   origin: frontendUrl,
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type,Authorization"
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serving image/video uploads
+// Serve static files
 const uploadsPath = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadsPath));
 console.log("✅ Serving static files from:", uploadsPath);
 
-// ✅ Connect MongoDB
-if (!process.env.MONGO_URI) {
-  console.error("❌ ERROR: MONGO_URI not defined in .env");
-  process.exit(1);
-}
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => {
@@ -51,72 +172,64 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
-// ✅ Import & use routes
-app.use("/api/auth", require("./routes/auth.route.js"));
-app.use("/api/trade-items", require("./routes/TradeItem.route.js"));
-app.use("/api/donation-items", require("./routes/DonationItem.route.js"));
-app.use("/api/search", require("./routes/search.route.js"));
-app.use("/api/chat", require("./routes/chat.route.js"));
-app.use("/api/requests", require("./routes/ItemRequest.route.js"));
-app.use("/api/users", require("./routes/user.route.js"));
-app.use("/api/reports", require("./routes/reportTrade.routes.js"));  // ✅ Corrected route for reports
-app.use("/api/items", require("./routes/Explore.route.js")); // 🌟 Used in Explore.jsx
+// Routes configuration
+app.use("/api/auth", require("./routes/auth.route"));
+app.use("/api/trade-items", require("./routes/TradeItem.route"));
+app.use("/api/donation-items", require("./routes/DonationItem.route"));
+app.use("/api/search", require("./routes/search.route"));
+app.use("/api/chat", require("./routes/chat.route"));
+app.use("/api/requests", require("./routes/ItemRequest.route"));
+app.use("/api/users", require("./routes/user.route"));
+app.use("/api/reports", require("./routes/report.route"));
+app.use("/api/items", require("./routes/Explore.route"));
 
-// ✅ Root route
+// Root route
 app.get("/", (req, res) => {
   res.send("🎉 TakeItHome API is running...");
 });
 
-// ✅ Socket.io messaging logic
-// io.on("connection", (socket) => {
-//   console.log("🔌 Connected:", socket.id);
-//   socket.on("send_message", async (data) => {
-//     try {
-//       const savedMessage = await createMessage(data); // must exist
-//       io.emit("receive_message", savedMessage);
-//     } catch (err) {
-//       console.error("Message save error:", err.message);
-//     }
-//   });
-// });
-
+// Socket.IO event handlers
 io.on("connection", (socket) => {
-  console.log("🔌 Connected:", socket.id);
+  console.log("🔌 User connected:", socket.id);
 
-  // Join the user to a room named by their userId
+  // Join user-specific room
   socket.on("join", (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their room`);
+    socket.join(userId.toString());
+    console.log(`👤 User ${userId} joined their room`);
   });
 
-  // When a message is sent
+  // Handle message sending
   socket.on("send_message", async (data) => {
     try {
-      // Save to DB
-      const saved = await createMessage(data);
+      const savedMessage = await createMessage(data);
 
-      // Emit to both participants
-      io.to(data.receiverId).emit("receive_message", saved);
-      io.to(data.senderId).emit("receive_message", saved);
+      // Emit to both participants using string IDs
+      io.to(savedMessage.senderId.toString()).emit("receive_message", savedMessage);
+      io.to(savedMessage.receiverId.toString()).emit("receive_message", savedMessage);
     } catch (err) {
-      console.error("Message save error:", err.message);
+      console.error("❌ Message save error:", err.message);
     }
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("🔌 User disconnected:", socket.id);
   });
 });
 
-// ✅ Start the backend server
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-// ✅ Handle unhandled errors
+// Error handling
 process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Rejection:", err.message);
   server.close(() => process.exit(1));
 });
 
-// ✅ Debug log for every request
+// Request logging
 app.use((req, res, next) => {
   console.log(`👉 [${req.method}] ${req.url}`);
   next();
+});
+
+// Start server
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

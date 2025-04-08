@@ -20,12 +20,12 @@ const messageSchema = new mongoose.Schema({
   itemId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'itemModel'  // Dynamic reference to support multiple models
+    refPath: 'itemModel'  // Dynamic reference
   },
   itemModel: {
     type: String,
     required: true,
-    enum: ['DonationItem', 'TradeItem']  // Supports both models
+    enum: ['DonationItem', 'TradeItem']  // Correct enum values
   },
   createdAt: {
     type: Date,

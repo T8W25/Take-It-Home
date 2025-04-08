@@ -54,14 +54,15 @@ exports.getConversations = async (req, res) => {
   // ✅ NEW: persist an incoming message
 exports.createMessage = async (data) => {
   const { senderId, receiverId, content, itemId, itemType } = data;
-  const msg = new Message({
-    senderId,
-    receiverId,
-    content,
-    itemId,
-    itemModel: itemType === "trade" ? "TradeItem" : "DonationItem",
+  const newMessage = new Message({
+    senderId: data.senderId,
+    receiverId: data.receiverId,
+    content: data.content,
+    itemId: data.itemId,
+    itemModel: data.itemModel,
     createdAt: new Date()
   });
-  return await msg.save();
+  return await newMessage.save();
 };
+
   
