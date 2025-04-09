@@ -1,14 +1,17 @@
+// ChatPage.jsx
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import io from "socket.io-client";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const socket = io("http://localhost:3002", {
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3002";
+
+const socket = io(API_BASE, {
   withCredentials: true,
-  transports: ['websocket'],
+  transports: ["websocket"],
   auth: {
-    token: localStorage.getItem("jwtToken")
-  }
+    token: localStorage.getItem("jwtToken"),
+  },
 });
 
 const ChatPage = () => {
@@ -16,210 +19,182 @@ const ChatPage = () => {
   const location = useLocation();
   const { itemId, receiverId, itemType, username } = location.state || {};
   const user = JSON.parse(localStorage.getItem("user")) || {};
-  const loggedInUserId = user._id || user.id; // Updated to check both _id and id
+  const loggedInUserId = user._id || user.id;
 
   const [message, setMessage] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const [conversations, setConversations] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(
-    itemId && receiverId
-      ? { itemId, userId: receiverId, itemType, username }
-      : null
-  );
+  const [selectedChat, setSelectedChat] = useState(null);
   const [listing, setListing] = useState(null);
   const [otherUser, setOtherUser] = useState(null);
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3002";
   const token = localStorage.getItem("jwtToken");
 
-  // Log token and user for debugging
-  console.log("Token:", token);
-  console.log("User:", user);
-
-  // Redirect if not authenticated
+  // Auth check
   useEffect(() => {
-    if (!token || !loggedInUserId) {
-      navigate("/login");
-    }
+    if (!token || !loggedInUserId) navigate("/login");
   }, [token, loggedInUserId, navigate]);
 
   // Load conversations
   useEffect(() => {
     if (!token) return;
 
-    const loadConversations = async () => {
+    const fetchConversations = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/chat/conversations/${loggedInUserId}`, {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
         setConversations(data);
 
-        // Auto-select conversation if coming from notification
         if (itemId && receiverId) {
-          const targetItemId = itemId.toString();
-          const targetReceiverId = receiverId.toString();
-          const found = data.find((conv) => 
-            conv.itemId && conv.itemId._id &&
-            conv.itemId._id.toString() === targetItemId &&
-            ((conv.user1 && conv.user1._id.toString() === targetReceiverId) || 
-            (conv.user2 && conv.user2._id.toString() === targetReceiverId))
+          const found = data.find(
+            (c) =>
+              c.itemId?._id?.toString() === itemId.toString() &&
+              c.userId?.toString() === receiverId.toString()
           );
           if (found) {
-            const otherUser = found.user1._id.toString() === loggedInUserId ? found.user2 : found.user1;
             setSelectedChat({
-              itemId: found.itemId._id.toString(),
-              userId: otherUser._id.toString(),
-              username: otherUser.username,
-              itemType: found.itemModel === "TradeItem" ? "trade" : "donation"
+              itemId: found.itemId._id,
+              userId: found.userId,
+              username: found.username,
+              itemType: found.itemType,
             });
-          } else {
-            setSelectedChat({ itemId, userId: receiverId, itemType, username });
           }
         }
       } catch (err) {
-        console.error("Error loading conversations:", err);
-        if (err.message.includes("401")) {
-          navigate("/login");
-        }
+        console.error("Failed to fetch conversations:", err);
       }
     };
 
-    loadConversations();
-  }, [loggedInUserId, itemId, receiverId, token, navigate, itemType, username]);
+    fetchConversations();
+  }, [itemId, receiverId, loggedInUserId, token]);
 
-  // Load chat history and listing details when a conversation is selected
+  // Load messages and item
   useEffect(() => {
-    if (!selectedChat?.itemId || !token) return;
+    if (!selectedChat || !token) return;
 
-    const loadChatData = async () => {
+    const fetchChatDetails = async () => {
       try {
-        const historyRes = await fetch(
-          `${API_BASE}/api/chat/history/${selectedChat.itemId}/${loggedInUserId}/${selectedChat.userId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const historyData = await historyRes.json();
+        const { itemId, userId, itemType } = selectedChat;
+
+        const history = await fetch(`${API_BASE}/api/chat/history/${itemId}/${loggedInUserId}/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const historyData = await history.json();
         setChatLog(historyData);
 
-        const endpoint = selectedChat.itemType === "trade" 
-          ? "api/trade-items" 
-          : "api/donation-items";
-        const itemRes = await fetch(
-          `${API_BASE}/${endpoint}/${selectedChat.itemId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const endpoint = itemType === "trade" ? "trade-items" : "donation-items";
+        const itemRes = await fetch(`${API_BASE}/api/${endpoint}/${itemId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const itemData = await itemRes.json();
         setListing(itemData);
 
-        const userRes = await fetch(
-          `${API_BASE}/api/users/${selectedChat.userId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const userRes = await fetch(`${API_BASE}/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const userData = await userRes.json();
         setOtherUser(userData);
       } catch (err) {
-        console.error("Error loading chat data:", err);
-        if (err.message.includes("401")) {
-          navigate("/login");
-        }
+        console.error("Chat loading failed:", err);
       }
     };
 
-    loadChatData();
-  }, [selectedChat, loggedInUserId, token, navigate]);
+    fetchChatDetails();
+  }, [selectedChat, token, loggedInUserId]);
 
+  // Listen for new messages
   useEffect(() => {
-    const handleMessage = (newMessage) => {
+    const handleReceive = (msg) => {
       if (
-        newMessage.itemId.toString() === selectedChat?.itemId.toString() &&
-        (newMessage.senderId.toString() === selectedChat.userId.toString() ||
-         newMessage.receiverId.toString() === selectedChat.userId.toString())
+        selectedChat &&
+        msg.itemId.toString() === selectedChat.itemId.toString() &&
+        (msg.senderId.toString() === selectedChat.userId.toString() ||
+          msg.receiverId.toString() === selectedChat.userId.toString())
       ) {
-        setChatLog(prev => [...prev, newMessage]);
+        setChatLog((prev) => [...prev, msg]);
       }
     };
 
-    socket.on("receive_message", handleMessage);
-    return () => socket.off("receive_message", handleMessage);
+    socket.on("receive_message", handleReceive);
+    return () => socket.off("receive_message", handleReceive);
   }, [selectedChat]);
 
+  // Join user room
   useEffect(() => {
-    if (loggedInUserId && token) {
+    if (loggedInUserId) {
       socket.emit("join", loggedInUserId.toString());
     }
-  }, [loggedInUserId, token]);
+  }, [loggedInUserId]);
 
   const handleSend = (e) => {
     e.preventDefault();
     if (!message.trim() || !selectedChat) return;
+
     const newMsg = {
       senderId: loggedInUserId,
       receiverId: selectedChat.userId,
       content: message,
       itemId: selectedChat.itemId,
-      itemModel: selectedChat.itemType === "trade" ? "TradeItem" : "DonationItem"
+      itemModel: selectedChat.itemType === "trade" ? "TradeItem" : "DonationItem",
     };
+
     socket.emit("send_message", newMsg);
-    setChatLog(prev => [...prev, { ...newMsg, createdAt: new Date().toISOString() }]);
+    setChatLog((prev) => [...prev, { ...newMsg, createdAt: new Date().toISOString() }]);
     setMessage("");
   };
 
   return (
     <Container fluid className="mt-4">
       <Row>
-        {/* Conversations List */}
+        {/* Sidebar */}
         <Col md={3} style={{ borderRight: "1px solid #ddd", height: "80vh", overflowY: "auto" }}>
           <h5>Messages</h5>
           {conversations.length === 0 ? (
-            <p>Select a conversation to begin</p>
+            <p>No conversations</p>
           ) : (
-            conversations.map((conv, i) => (
+            conversations.map((conv, idx) => (
               <div
-                key={i}
-                onClick={() => setSelectedChat({
-                  itemId: conv.itemId._id.toString(),
-                  userId: conv.user1 && conv.user1._id.toString() === loggedInUserId ? conv.user2._id.toString() : conv.user1._id.toString(),
-                  username: conv.user1 && conv.user1._id.toString() === loggedInUserId ? conv.user2.username : conv.user1.username,
-                  itemType: conv.itemModel === "TradeItem" ? "trade" : "donation"
-                })}
+                key={idx}
+                onClick={() =>
+                  setSelectedChat({
+                    itemId: conv.itemId._id,
+                    userId: conv.userId,
+                    username: conv.username,
+                    itemType: conv.itemType,
+                  })
+                }
                 style={{
                   padding: "10px",
                   backgroundColor:
-                    selectedChat &&
-                    conv.itemId &&
-                    conv.itemId._id &&
-                    conv.itemId._id.toString() === selectedChat.itemId &&
-                    ((conv.user1 && conv.user1._id.toString() === selectedChat.userId) ||
-                     (conv.user2 && conv.user2._id.toString() === selectedChat.userId))
+                    selectedChat?.itemId === conv.itemId._id &&
+                    selectedChat?.userId === conv.userId
                       ? "#f0f0f0"
                       : "transparent",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
               >
-                <div><strong>With:</strong> {conv.user1 && conv.user1._id.toString() === loggedInUserId ? conv.user2.username : conv.user1.username}</div>
+                <strong>With:</strong> {conv.username}
                 <div style={{ fontSize: "0.8em", color: "#888" }}>{conv.lastMessage}</div>
               </div>
             ))
           )}
         </Col>
 
-        {/* Chat Panel */}
+        {/* Chat */}
         <Col md={6}>
           {selectedChat ? (
             <>
-              <h5 className="mb-3">Chat with {selectedChat.username}</h5>
+              <h5>Chat with {selectedChat.username}</h5>
               <div style={{ height: "60vh", overflowY: "auto", border: "1px solid #ccc", padding: 10 }}>
                 {chatLog.length === 0 ? (
                   <p>No messages yet.</p>
                 ) : (
-                  chatLog.map((msg, i) => (
-                    <div key={i} style={{ marginBottom: "10px" }}>
-                      <strong>{msg.senderId.toString() === loggedInUserId ? "You" : selectedChat.username}</strong>: {msg.content}
-                      <div style={{ fontSize: "0.8em", color: "#999" }}>
-                        {new Date(msg.createdAt).toLocaleString()}
-                      </div>
+                  chatLog.map((msg, idx) => (
+                    <div key={idx} style={{ marginBottom: 10 }}>
+                      <strong>{msg.senderId.toString() === loggedInUserId ? "You" : selectedChat.username}</strong>:{" "}
+                      {msg.content}
+                      <div style={{ fontSize: "0.8em", color: "#999" }}>{new Date(msg.createdAt).toLocaleString()}</div>
                     </div>
                   ))
                 )}
@@ -237,27 +212,17 @@ const ChatPage = () => {
               </Form>
             </>
           ) : (
-            <p className="text-muted mt-5">Select a conversation to begin</p>
+            <p className="text-muted">Select a conversation to begin</p>
           )}
         </Col>
 
-        {/* Listing & User Details */}
+        {/* Listing Info */}
         <Col md={3} style={{ borderLeft: "1px solid #ddd" }}>
           <h5>Listing Info</h5>
           {listing ? (
-            <div className="mt-3">
-              {listing.imageUrl ? (
-                <img
-                  src={`${API_BASE}${listing.imageUrl}`}
-                  alt={listing.title}
-                  style={{ width: "100%", borderRadius: "5px", marginBottom: "10px" }}
-                />
-              ) : listing.imageBase64 ? (
-                <img
-                  src={listing.imageBase64}
-                  alt={listing.title}
-                  style={{ width: "100%", borderRadius: "5px", marginBottom: "10px" }}
-                />
+            <div>
+              {listing.imageBase64 ? (
+                <img src={listing.imageBase64} alt="Item" style={{ width: "100%", borderRadius: "5px" }} />
               ) : (
                 <p>No image available</p>
               )}
@@ -269,14 +234,16 @@ const ChatPage = () => {
           ) : (
             <p className="text-muted">No item selected</p>
           )}
-          
+
           <h5 className="mt-4">User Profile</h5>
           {otherUser ? (
-            <div className="mt-3">
-              <img 
-                src={`${API_BASE}${otherUser.profileImage || '/default-profile.png'}`} 
-                alt="Profile" 
-                style={{ width: "100px", borderRadius: "50%", marginBottom: "10px" }} 
+            <div>
+              <img
+                src={otherUser.profileImage?.startsWith("data")
+                  ? otherUser.profileImage
+                  : `${API_BASE}${otherUser.profileImage || "/default-profile.png"}`}
+                alt="Profile"
+                style={{ width: "100px", borderRadius: "50%", marginBottom: 10 }}
               />
               <div><strong>Name:</strong> {otherUser.name}</div>
               <div><strong>Email:</strong> {otherUser.email}</div>
@@ -291,9 +258,6 @@ const ChatPage = () => {
 };
 
 export default ChatPage;
-
-
-
 
 
 

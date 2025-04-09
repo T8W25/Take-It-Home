@@ -1,36 +1,45 @@
 // controllers/chat.controller.js
 const Message = require("../models/Message.model");
 exports.getConversations = async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const messages = await Message.find({
-        $or: [{ senderId: userId }, { receiverId: userId }]
-      })
-        .populate("senderId", "username") // Include sender username
-        .populate("receiverId", "username"); // Include receiver username
-  
-      const conversations = messages.reduce((acc, msg) => {
-        const otherUser = msg.senderId._id === userId ? msg.receiverId : msg.senderId;
-        const key = `${msg.itemId}-${otherUser._id}`;
-        
-        if (!acc[key]) {
-          acc[key] = {
-            itemId: msg.itemId,
-            userId: otherUser._id,
-            username: otherUser.username, // Add username
-            lastMessage: msg.content,
-            timestamp: msg.createdAt
-          };
-        }
-        return acc;
-      }, {});
-  
-      res.json(Object.values(conversations));
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch conversations" });
-    }
-  };
-  
+  try {
+    const { userId } = req.params;
+
+    const messages = await Message.find({
+      $or: [{ senderId: userId }, { receiverId: userId }]
+    })
+    .populate("senderId", "username")
+    .populate("receiverId", "username")
+    .populate("itemId")
+    .sort({ createdAt: -1 });
+
+    const conversations = messages.reduce((acc, msg) => {
+      const otherUser = (msg.senderId._id.toString() === userId)
+        ? msg.receiverId
+        : msg.senderId;
+
+      const key = `${msg.itemId._id}-${otherUser._id}`;
+
+      if (!acc[key]) {
+        acc[key] = {
+          itemId: msg.itemId._id,
+          userId: otherUser._id,
+          username: otherUser.username,
+          lastMessage: msg.content,
+          timestamp: msg.createdAt,
+          itemType: msg.itemModel === "DonationItem" ? "donation" : "trade"
+        };
+      }
+
+      return acc;
+    }, {});
+
+    res.json(Object.values(conversations));
+  } catch (err) {
+    console.error("Error fetching conversations:", err);
+    res.status(500).json({ message: "Failed to fetch conversations" });
+  }
+};
+
   exports.getChatHistory = async (req, res) => {
     try {
       const { itemId, user1, user2 } = req.params;
