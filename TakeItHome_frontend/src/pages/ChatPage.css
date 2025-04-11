@@ -1,0 +1,93 @@
+.chat-container {
+    padding: 1rem;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .chat-sidebar {
+    background: #0f172a;
+    color: white;
+    height: 80vh;
+    overflow-y: auto;
+    padding: 1rem;
+    border-right: 1px solid #1e293b;
+  }
+  
+  .chat-sidebar h5 {
+    color: #38bdf8;
+    margin-bottom: 1rem;
+  }
+  
+  .chat-conv {
+    background: #1e293b;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .chat-conv.active {
+    background: #334155;
+  }
+  
+  .last-message {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+  }
+  
+  .chat-panel {
+    background: #f8fafc;
+    padding: 1rem;
+    height: 80vh;
+    border-right: 1px solid #ddd;
+  }
+  
+  .chat-history {
+    height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+  
+  .chat-msg {
+    margin-bottom: 12px;
+  }
+  
+  .chat-msg.me {
+    text-align: right;
+    color: #16a34a;
+  }
+  
+  .chat-msg.them {
+    text-align: left;
+    color: #0ea5e9;
+  }
+  
+  .chat-time {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  
+  .chat-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .chat-details {
+    background: #f1f5f9;
+    padding: 1rem;
+    height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .chat-details .chat-image {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .profile-pic {
+    width: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  

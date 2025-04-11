@@ -27,10 +27,12 @@ const messageSchema = new mongoose.Schema({
     required: true,
     enum: ['DonationItem', 'TradeItem']  // Correct enum values
   },
+
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
+  
 });
 
 module.exports = mongoose.model('Message', messageSchema);

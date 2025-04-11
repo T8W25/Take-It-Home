@@ -61,17 +61,26 @@ exports.getConversations = async (req, res) => {
   };
 
   // ✅ NEW: persist an incoming message
+// ✅ Ensure this is already in your chat.controller.js
+
 exports.createMessage = async (data) => {
-  const { senderId, receiverId, content, itemId, itemType } = data;
+  console.log("🔥 Incoming Message Data:", data); // Add this line
+
   const newMessage = new Message({
     senderId: data.senderId,
     receiverId: data.receiverId,
     content: data.content,
     itemId: data.itemId,
     itemModel: data.itemModel,
-    createdAt: new Date()
+    createdAt: new Date(),
   });
-  return await newMessage.save();
+
+  const saved = await newMessage.save();
+  console.log("✅ Message saved to DB:", saved); // And this line
+  return saved;
 };
+
+
+
 
   
