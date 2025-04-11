@@ -24,20 +24,7 @@ function PostItemDonation() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
-    const token = localStorage.getItem("jwtToken");
-    try {
-      const res = await fetch(`${API_BASE}/delete/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete item");
-      fetchItems();
-    } catch (err) {
-      console.error("❌ Delete error:", err);
-    }
-  };
+
 
   return (
     <Container className="donation-container">
@@ -73,8 +60,6 @@ function PostItemDonation() {
             </Link>
 
             <div className="card-actions">
-              <Button variant="warning" size="sm">Edit</Button>
-              <Button variant="danger" size="sm" onClick={() => handleDelete(item._id)}>Delete</Button>
               <Link to={`/report/${item._id}`}>
                 <Button variant="info" size="sm">Report</Button>
               </Link>
