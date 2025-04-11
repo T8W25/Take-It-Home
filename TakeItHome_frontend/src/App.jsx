@@ -42,10 +42,9 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/trade/:id" element={<TradeItemDetail />} />
-        <Route path="/donate/:id" element={<DonationItemDetail />} />
+        <Route path="/trade/:id" element={<TradeItemDetail />} />        <Route path="/donate/:id" element={<DonationItemDetail />} />
         <Route path="/donate/:id/message" element={<MessageRequest />} />
-        <Route path="/trade/:id/message" element={<MessageRequestTrade />} />
+        <Route path="/trade/:id/message" element={<MessageRequestTrade />} />   
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/search" element={<SearchResults />} />
