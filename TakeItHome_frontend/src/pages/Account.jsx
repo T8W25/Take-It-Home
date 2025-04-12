@@ -18,8 +18,8 @@ const Account = () => {
       <Route path="/trade-item" element={<PostItemTrade />} />
       <Route path="/donate-item" element={<PostItemDonation />} />
       {/* fallback */}
-      <Route path="*" element={<Navigate to="/profile" />} />
       <Route path="/my-posts" element={<MyPosts />} />
+      <Route path="*" element={<Navigate to="/profile" />} />
     </Routes>
   );
 };

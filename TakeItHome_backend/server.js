@@ -10,9 +10,16 @@ const { createMessage } = require("./controllers/chat.controller"); // ✅ Messa
 
 const app = express();
 const server = http.createServer(app);
+
+// Determine the environment (development or production)
+const isProduction = process.env.NODE_ENV === "production";
+const frontEndUrl = isProduction
+  ? "https://take-it-home-1.onrender.com"
+  : "http://localhost:5173";
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173" || "https://take-it-home-1.onrender.com/", // ✅ Match frontend
+    origin: frontEndUrl, // ✅ Dynamically set the frontend URL
     methods: ["GET", "POST"]
   }
 });
@@ -22,7 +29,7 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // ✅ Middleware
 app.use(cors({
-  origin: "http://localhost:5173" || "https://take-it-home-1.onrender.com/",
+  origin: frontEndUrl, // ✅ Dynamically set the frontend URL
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
   allowedHeaders: "Content-Type,Authorization"
