@@ -5,7 +5,7 @@ import "./PostItemTrade.css";
 
 function PostItemTrade() {
   const [items, setItems] = useState([]);
-  const API_BASE = "http://localhost:3002/api/trade-items" || "https://take-it-home-8ldm.onrender.com/api/trade-items";
+  const API_BASE = "https://take-it-home-8ldm.onrender.com/api/trade-items";
 
   useEffect(() => {
     fetchItems();

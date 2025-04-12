@@ -10,7 +10,7 @@ function Signup() {
   const [loading, setLoading] = useState(false); // Loading state
 
   // Ensure the API URL matches your backend
-  const API_URL = "http://localhost:3002/api/auth/signup" || "https://take-it-home-8ldm.onrender.com/api/auth/signup"; // Change if backend runs on another port
+  const API_URL = "https://take-it-home-8ldm.onrender.com/api/auth/signup"; // Change if backend runs on another port
 
   const handleSubmit = async (event) => {
     event.preventDefault();

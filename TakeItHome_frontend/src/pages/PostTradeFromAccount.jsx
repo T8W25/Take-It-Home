@@ -3,7 +3,7 @@ import { Alert, Form, Button, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import "./PostTradeFromAccount.css";
 
-const API_BASE = "http://localhost:3002/api/trade-items" || "https://take-it-home-8ldm.onrender.com/api/trade-items";
+const API_BASE = "https://take-it-home-8ldm.onrender.com/api/trade-items";
 
 const PostTradeFromAccount = () => {
   const { id } = useParams();

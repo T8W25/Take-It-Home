@@ -9,7 +9,7 @@ function ReportPage() {
   const [reason, setReason] = useState("");  // State to hold the report reason
 
   // Set base URL dynamically based on item type
-  const API_BASE = type === "trade" ? "http://localhost:3002/api/trade-items" : "https://take-it-home-8ldm.onrender.com/api/donation-items"; 
+  const API_BASE = type === "trade" ? "https://take-it-home-8ldm.onrender.com/api/trade-items" : "https://take-it-home-8ldm.onrender.com/api/donation-items"; 
 
   useEffect(() => {
     const fetchItemDetails = async () => {

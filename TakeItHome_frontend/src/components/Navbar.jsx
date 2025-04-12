@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import axios from "axios";
 import "./Navbar.css";
+const API_BASE ="https://take-it-home-8ldm.onrender.com";
 
-const API_BASE = "http://localhost:3002/api/donation-items" || "https://take-it-home-8ldm.onrender.com";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

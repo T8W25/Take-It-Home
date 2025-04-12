@@ -5,7 +5,7 @@ import io from "socket.io-client";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./ChatPage.css"; // ✅ Custom styles
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://take-it-home-8ldm.onrender.com";
+const API_BASE = "https://take-it-home-8ldm.onrender.com";
 const socket = io(API_BASE, {
   withCredentials: true,
   transports: ["websocket"],

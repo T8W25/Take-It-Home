@@ -6,7 +6,7 @@ import "./PostItemDonation.css";
 function PostItemDonation() {
   const [items, setItems] = useState([]);
   const [message, setMessage] = useState(null);
-  const API_BASE = "http://localhost:3002/api/donation-items" || "https://take-it-home-8ldm.onrender.com/api/donation-items";
+  const API_BASE = "https://take-it-home-8ldm.onrender.com/api/donation-items";
 
   useEffect(() => {
     fetchItems();
