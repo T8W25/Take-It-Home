@@ -32,6 +32,7 @@ import PostTradeFromAccount from './pages/PostTradeFromAccount';
 import PostDonationFromAccount from './pages/PostDonationFromAccount';
 
 
+
 function App() {
   return (
     <>
@@ -42,10 +43,10 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/trade/:id" element={<TradeItemDetail />} />
-        <Route path="/donate/:id" element={<DonationItemDetail />} />
+        <Route path="/trade/:id" element={<TradeItemDetail />} />       
+         <Route path="/donate/:id" element={<DonationItemDetail />} />
         <Route path="/donate/:id/message" element={<MessageRequest />} />
-        <Route path="/trade/:id/message" element={<MessageRequestTrade />} />
+        <Route path="/trade/:id/message" element={<MessageRequestTrade />} />   
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/search" element={<SearchResults />} />
@@ -64,10 +65,15 @@ function App() {
 
         {/* ✅ Forms for posting under account section */}
         <Route path="/account/post-trade" element={<PostTradeFromAccount />} />
+        <Route path="/account/post-trade/:id" element={<PostTradeFromAccount />} />
+
         <Route path="/account/post-donation" element={<PostDonationFromAccount />} />
+        <Route path="/account/post-donation/:id" element={<PostDonationFromAccount />} />
+
       </Routes>
     </>
   );
 }
+
 
 export default App;

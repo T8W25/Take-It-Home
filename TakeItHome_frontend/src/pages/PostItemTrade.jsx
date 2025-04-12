@@ -22,20 +22,7 @@ function PostItemTrade() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
-    const token = localStorage.getItem("jwtToken");
-    try {
-      const res = await fetch(`${API_BASE}/delete/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete item");
-      fetchItems();
-    } catch (err) {
-      console.error("❌ Delete error:", err);
-    }
-  };
+
 
   return (
     <Container className="trade-container">
@@ -64,8 +51,6 @@ function PostItemTrade() {
             </Link>
 
             <div className="card-actions">
-              <Button variant="warning" onClick={() => alert("Edit feature coming soon")}>Edit</Button>
-              <Button variant="danger" onClick={() => handleDelete(item._id)}>Delete</Button>
               <Link to={`/report-trade/${item._id}`}>
                 <Button variant="info">Report</Button>
               </Link>
