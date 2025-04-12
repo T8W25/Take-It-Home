@@ -16,7 +16,7 @@ function ReportTrade() {
     const token = localStorage.getItem("jwtToken");
 
     try {
-      const response = await fetch(`http://localhost:3002/api/reports/report/${id}`, { // Adjust the API URL to match the backend
+      const response = await fetch(`https://take-it-home-8ldm.onrender.com/api/reports/report/${id}`, { // Adjust the API URL to match the backend
         method: "POST",
         headers: {
           "Content-Type": "application/json",

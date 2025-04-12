@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API_BASE = "http://localhost:3002/api/donation-items" || "https://take-it-home-8ldm.onrender.com";
+
 const ReportItemUser = ({ itemId, userId }) => {
   const [reportMessage, setReportMessage] = useState("");
   const [reportType, setReportType] = useState("item");
@@ -15,7 +17,7 @@ const ReportItemUser = ({ itemId, userId }) => {
     };
 
     try {
-      await axios.post("http://localhost:3000/api/reports", reportData);
+      await axios.post("https://take-it-home-8ldm.onrender.com/api/reports", reportData);
       alert("Report submitted successfully!");
     } catch (err) {
       console.error("Error submitting report:", err);

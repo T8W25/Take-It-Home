@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const API_LOGIN_URL = "http://localhost:3002/api/auth/login";
-const API_LOGOUT_URL = "http://localhost:3002/api/auth/logout";
+const API_LOGIN_URL = "http://localhost:3002/api/auth/login" || "https://take-it-home-8ldm.onrender.com/api/auth/login";
+const API_LOGOUT_URL = "http://localhost:3002/api/auth/logout"|| "https://take-it-home-8ldm.onrender.com/api/auth/logout";
 
 function Login() {
   const [email, setEmail] = useState("");

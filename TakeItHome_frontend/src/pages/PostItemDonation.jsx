@@ -6,7 +6,7 @@ import "./PostItemDonation.css";
 function PostItemDonation() {
   const [items, setItems] = useState([]);
   const [message, setMessage] = useState(null);
-  const API_BASE = "http://localhost:3002/api/donation-items";
+  const API_BASE = "http://localhost:3002/api/donation-items" || "https://take-it-home-8ldm.onrender.com/api/donation-items";
 
   useEffect(() => {
     fetchItems();
@@ -42,11 +42,11 @@ function PostItemDonation() {
           <div className="donation-card" key={item._id}>
             <Link to={`/donate/${item._id}`} style={{ textDecoration: "none", color: "inherit" }}>
               {item.imageUrl && (
-                <Card.Img variant="top" src={`http://localhost:3002${item.imageUrl}`} />
+                <Card.Img variant="top" src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`} />
               )}
               {!item.imageUrl && item.videoUrl && (
                 <video controls>
-                  <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                  <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
                 </video>
               )}
               <Card.Body>

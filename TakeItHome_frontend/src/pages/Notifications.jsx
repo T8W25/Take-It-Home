@@ -239,7 +239,7 @@ import { Container, Card, Spinner, Alert, Tabs, Tab, Button } from 'react-bootst
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3002";
+const API_BASE = import.meta.env.VITE_API_URL || "https://take-it-home-8ldm.onrender.com";
 
 const Notifications = () => {
   const [requests, setRequests] = useState([]);

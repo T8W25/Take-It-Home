@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
 const NotificationList = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
 
@@ -8,7 +7,7 @@ const NotificationList = ({ userId }) => {
     if (!userId) return;
 
     axios
-      .get(`http://localhost:3002/api/notifications/${userId}`)
+      .get(`https://take-it-home-8ldm.onrender.com/api/notifications/${userId}`)
       .then((res) => setNotifications(res.data))
       .catch((err) => console.error('❌ Fetch failed:', err));
   }, [userId]);

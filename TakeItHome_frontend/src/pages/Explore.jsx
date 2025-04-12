@@ -3,7 +3,7 @@ import axios from 'axios';
 import './Explore.css';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:3002'; // or your hosted URL
+const API_BASE = 'https://take-it-home-8ldm.onrender.com'; // or your hosted URL
 
 const Explore = () => {
   const [items, setItems] = useState([]);

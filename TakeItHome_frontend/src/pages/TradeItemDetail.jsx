@@ -11,7 +11,7 @@ const TradeItemDetail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/trade-items/${id}`);
+        const res = await fetch(`https://take-it-home-8ldm.onrender.com/api/trade-items/${id}`);
         if (!res.ok) throw new Error("Failed to fetch item");
         const data = await res.json();
         setItem(data);
@@ -35,13 +35,13 @@ const TradeItemDetail = () => {
         {item.imageUrl && (
           <Card.Img
             variant="top"
-            src={`http://localhost:3002${item.imageUrl}`}
+            src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
             style={{ maxHeight: "400px", objectFit: "cover" }}
           />
         )}
         {item.videoUrl && (
           <video controls style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}>
-            <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+            <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
           </video>
         )}
         <Card.Body>

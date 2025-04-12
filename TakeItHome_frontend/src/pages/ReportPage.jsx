@@ -9,7 +9,7 @@ function ReportPage() {
   const [reason, setReason] = useState("");  // State to hold the report reason
 
   // Set base URL dynamically based on item type
-  const API_BASE = type === "trade" ? "http://localhost:3002/api/trade-items" : "http://localhost:3002/api/donation-items"; 
+  const API_BASE = type === "trade" ? "http://localhost:3002/api/trade-items" : "https://take-it-home-8ldm.onrender.com/api/donation-items"; 
 
   useEffect(() => {
     const fetchItemDetails = async () => {
@@ -66,7 +66,7 @@ function ReportPage() {
             {item.imageUrl && (
               <Card.Img
                 variant="top"
-                src={`http://localhost:3002${item.imageUrl}`}
+                src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`}
                 style={{ maxHeight: "200px", objectFit: "cover" }}
               />
             )}

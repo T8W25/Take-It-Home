@@ -34,7 +34,7 @@ const MessageRequestTrade = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3002/api/requests", {
+      const res = await fetch("https://take-it-home-8ldm.onrender.com/api/requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

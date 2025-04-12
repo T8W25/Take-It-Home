@@ -4,7 +4,7 @@ import { Button, Spinner, Alert, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "./MyPosts.css";
 
-const API_BASE = "http://localhost:3002";
+const API_BASE = "https://take-it-home-8ldm.onrender.com";
 
 const MyPosts = () => {
   const [tradeItems, setTradeItems] = useState([]);

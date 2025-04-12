@@ -5,7 +5,7 @@ import "./PostItemTrade.css";
 
 function PostItemTrade() {
   const [items, setItems] = useState([]);
-  const API_BASE = "http://localhost:3002/api/trade-items";
+  const API_BASE = "http://localhost:3002/api/trade-items" || "https://take-it-home-8ldm.onrender.com/api/trade-items";
 
   useEffect(() => {
     fetchItems();
@@ -31,11 +31,11 @@ function PostItemTrade() {
           <div key={item._id} className="item-card">
             <Link to={`/trade/${item._id}`} style={{ textDecoration: "none", color: "inherit" }}>
               {item.imageUrl && (
-                <Card.Img src={`http://localhost:3002${item.imageUrl}`} />
+                <Card.Img src={`https://take-it-home-8ldm.onrender.com${item.imageUrl}`} />
               )}
               {!item.imageUrl && item.videoUrl && (
                 <video controls>
-                  <source src={`http://localhost:3002${item.videoUrl}`} type="video/mp4" />
+                  <source src={`https://take-it-home-8ldm.onrender.com${item.videoUrl}`} type="video/mp4" />
                 </video>
               )}
               <Card.Body>
