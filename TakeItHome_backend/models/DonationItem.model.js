@@ -8,6 +8,7 @@ const donationItemSchema = new mongoose.Schema(
     description: { type: String, required: true },
     imageUrl: { type: String },
     videoUrl: { type: String },
+    sold: { type: Boolean, default: false },
     location: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     donated: { type: Boolean, default: false } // ✅ New field

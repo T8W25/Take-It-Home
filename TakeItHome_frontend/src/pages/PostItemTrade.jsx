@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Container, Card } from "react-bootstrap";
+import { Button, Container, Card, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "./PostItemTrade.css";
 
@@ -14,15 +14,14 @@ function PostItemTrade() {
   const fetchItems = async () => {
     try {
       const res = await fetch(`${API_BASE}/all`);
-      if (!res.ok) throw new Error("Failed to fetch items");
+      if (!res.ok) throw new Error("Failed to fetch trade items");
       const data = await res.json();
+      console.log("Trade items (PostItemTrade):", data);
       setItems(data);
     } catch (err) {
-      console.error("❌ Fetch error:", err);
+      console.error("❌ Fetch error (PostItemTrade):", err);
     }
   };
-
-
 
   return (
     <Container className="trade-container">
@@ -54,6 +53,11 @@ function PostItemTrade() {
               <Link to={`/report-trade/${item._id}`}>
                 <Button variant="info">Report</Button>
               </Link>
+              {item.sold === true && (
+                <Badge bg="success" className="sold-badge ms-2">
+                  Sold
+                </Badge>
+              )}
             </div>
           </div>
         ))}

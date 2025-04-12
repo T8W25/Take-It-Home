@@ -9,6 +9,7 @@ const tradeItemSchema = new mongoose.Schema(
     location: { type: String, required: true },
     imageBase64: { type: String }, // ✅ base64 encoded image
     videoUrl: { type: String },
+    sold: { type: Boolean, default: false },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
   },
   { timestamps: true }
