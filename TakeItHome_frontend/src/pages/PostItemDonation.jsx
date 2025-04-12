@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Container, Alert, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "./PostItemDonation.css"; // ✅ make sure this is included
+import "./PostItemDonation.css";
 
 function PostItemDonation() {
   const [items, setItems] = useState([]);
@@ -36,6 +36,25 @@ function PostItemDonation() {
       fetchItems();
     } catch (err) {
       console.error("❌ Delete error:", err);
+  const handleMarkAsDonated = async (id) => {
+    if (!window.confirm("Are you sure this item has been picked up and donated?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/donated/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to mark as donated");
+
+      setMessage({ type: "success", text: "Item marked as donated." });
+      fetchItems();
+    } catch (error) {
+      setMessage({ type: "danger", text: error.message });
     }
   };
 
@@ -74,8 +93,16 @@ function PostItemDonation() {
 
             <div className="card-actions">
               <Link to={`/report/${item._id}`}>
-                <Button variant="info" size="sm">Report</Button>
+                <Button variant="info" size="sm" className="me-2">Report</Button>
               </Link>
+
+              {!item.donated ? (
+                <Button variant="success" size="sm" onClick={() => handleMarkAsDonated(item._id)}>
+                  Mark as Donated
+                </Button>
+              ) : (
+                <span className="text-success fw-bold">Donated</span>
+              )}
             </div>
           </div>
         ))}
@@ -83,5 +110,6 @@ function PostItemDonation() {
     </Container>
   );
 }
+  }}
 
 export default PostItemDonation;
