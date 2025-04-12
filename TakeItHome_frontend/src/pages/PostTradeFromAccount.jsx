@@ -1,9 +1,13 @@
-import React, { useState } from "react";
-import { Alert } from "react-bootstrap";
-import "./PostTradeFromAccount.css"; // ✅ correct path
- // IMPORT CSS FILE HERE
+import React, { useState, useEffect } from "react";
+import { Alert, Form, Button, Container } from "react-bootstrap";
+import { useParams, useNavigate } from "react-router-dom";
+import "./PostTradeFromAccount.css";
+
+const API_BASE = "http://localhost:3002/api/trade-items";
 
 const PostTradeFromAccount = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -13,67 +17,117 @@ const PostTradeFromAccount = () => {
     image: null,
     video: null,
   });
-
   const [message, setMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const API_BASE = "http://localhost:3002/api/trade-items";
+  const [loading, setLoading] = useState(!!id);
+
+  useEffect(() => {
+    if (id) {
+      const fetchTradeItem = async () => {
+        try {
+          const token = localStorage.getItem("jwtToken");
+          const res = await fetch(`${API_BASE}/${id}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (!res.ok) throw new Error("Failed to fetch trade item");
+          const data = await res.json();
+          console.log("Fetched trade item:", data);
+          setFormData({
+            title: data.title || "",
+            category: data.category || "",
+            condition: data.condition || "",
+            description: data.description || "",
+            location: data.location || "",
+            image: null,
+            video: null,
+          });
+        } catch (err) {
+          setMessage({ type: "danger", text: err.message || "Failed to load trade item" });
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchTradeItem();
+    } else {
+      setLoading(false);
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value
+      [name]: files ? files[0] : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    const token = localStorage.getItem("jwtToken");
-    const form = new FormData();
 
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      setMessage({ type: "danger", text: "Please log in to submit" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const form = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (value) form.append(key, value);
     });
 
     try {
-      const res = await fetch(`${API_BASE}/post`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      const url = id ? `${API_BASE}/update/${id}` : `${API_BASE}/post`; // Changed to /update/:id
+      const method = id ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
         body: form,
       });
 
       if (!res.ok) throw new Error(await res.text());
-      
-      const data = await res.json();
-      setMessage({ type: "success", text: "Item posted successfully!" });
-      setFormData({
-        title: "", category: "", condition: "",
-        description: "", location: "", image: null, video: null
+
+      setMessage({
+        type: "success",
+        text: id ? "Trade item updated successfully!" : "Trade item posted successfully!",
       });
+      if (id) {
+        setTimeout(() => navigate("/my-posts"), 2000);
+      } else {
+        setFormData({
+          title: "",
+          category: "",
+          condition: "",
+          description: "",
+          location: "",
+          image: null,
+          video: null,
+        });
+      }
     } catch (err) {
-      setMessage({ type: "danger", text: err.message || "Posting failed" });
+      setMessage({ type: "danger", text: err.message || (id ? "Update failed" : "Posting failed") });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (loading) return <div className="text-center mt-5">Loading...</div>;
+
   return (
-    <div className="post-trade-container">
-      <h3 className="post-trade-title">Post Trade Item</h3>
-      
+    <Container className="post-trade-container">
+      <h3 className="post-trade-title">{id ? "Edit Trade Item" : "Post Trade Item"}</h3>
+
       {message && (
         <Alert variant={message.type} className="alert-3d">
           {message.text}
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        {/* Title Field */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Title*</label>
-          <input
+      <Form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Title*</Form.Label>
+          <Form.Control
             type="text"
             name="title"
             value={formData.title}
@@ -82,12 +136,11 @@ const PostTradeFromAccount = () => {
             required
             placeholder="Enter item title"
           />
-        </div>
+        </Form.Group>
 
-        {/* Category Field */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Category*</label>
-          <select
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Category*</Form.Label>
+          <Form.Select
             name="category"
             value={formData.category}
             onChange={handleChange}
@@ -98,13 +151,14 @@ const PostTradeFromAccount = () => {
             <option value="Electronics">Electronics</option>
             <option value="Furniture">Furniture</option>
             <option value="Clothing">Clothing</option>
-          </select>
-        </div>
+            <option value="Books">Books</option>
+            <option value="Sports">Sports</option>
+          </Form.Select>
+        </Form.Group>
 
-        {/* Condition Field */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Condition*</label>
-          <select
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Condition*</Form.Label>
+          <Form.Select
             name="condition"
             value={formData.condition}
             onChange={handleChange}
@@ -115,13 +169,14 @@ const PostTradeFromAccount = () => {
             <option value="New">New</option>
             <option value="Used-LikeNew">Used - Like New</option>
             <option value="Used-Good">Used - Good</option>
-          </select>
-        </div>
+            <option value="Used">Used</option>
+          </Form.Select>
+        </Form.Group>
 
-        {/* Description Field */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Description*</label>
-          <textarea
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Description*</Form.Label>
+          <Form.Control
+            as="textarea"
             name="description"
             value={formData.description}
             onChange={handleChange}
@@ -130,12 +185,11 @@ const PostTradeFromAccount = () => {
             required
             placeholder="Describe your item in detail..."
           />
-        </div>
+        </Form.Group>
 
-        {/* Location Field */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Location*</label>
-          <input
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Location*</Form.Label>
+          <Form.Control
             type="text"
             name="location"
             value={formData.location}
@@ -144,30 +198,28 @@ const PostTradeFromAccount = () => {
             required
             placeholder="City, State"
           />
-        </div>
+        </Form.Group>
 
-        {/* Image Upload */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Item Image*</label>
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Item Image {id ? "(Upload new to replace)" : "*"}</Form.Label>
           <div className="file-input-3d">
-            <input
+            <Form.Control
               type="file"
               name="image"
               accept="image/*"
               onChange={handleChange}
-              required
+              required={!id}
             />
             <span className="file-cta">
               {formData.image ? formData.image.name : "Choose file..."}
             </span>
           </div>
-        </div>
+        </Form.Group>
 
-        {/* Video Upload */}
-        <div className="form-group-3d">
-          <label className="form-label-3d">Video (Optional)</label>
+        <Form.Group className="form-group-3d">
+          <Form.Label className="form-label-3d">Video (Optional)</Form.Label>
           <div className="file-input-3d">
-            <input
+            <Form.Control
               type="file"
               name="video"
               accept="video/*"
@@ -177,10 +229,9 @@ const PostTradeFromAccount = () => {
               {formData.video ? formData.video.name : "Choose file..."}
             </span>
           </div>
-        </div>
+        </Form.Group>
 
-        {/* Submit Button */}
-        <button
+        <Button
           type="submit"
           className={`submit-btn-3d ${isSubmitting ? "submitting" : ""}`}
           disabled={isSubmitting}
@@ -188,14 +239,14 @@ const PostTradeFromAccount = () => {
           {isSubmitting ? (
             <>
               <span className="spinner"></span>
-              Posting...
+              {id ? "Updating..." : "Posting..."}
             </>
           ) : (
-            "Post Item Now"
+            id ? "Update Item" : "Post Item Now"
           )}
-        </button>
-      </form>
-    </div>
+        </Button>
+      </Form>
+    </Container>
   );
 };
 

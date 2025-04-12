@@ -1,0 +1,21 @@
+/* MyPosts.css */
+.button-wrapper {
+    display: inline-block;
+    margin-right: 8px; /* Consistent spacing between buttons */
+  }
+  
+  .action-button {
+    min-width: 80px; /* Ensure buttons have the same width */
+    padding: 6px 12px; /* Consistent padding */
+    font-size: 14px; /* Consistent font size */
+    line-height: 1.5; /* Align text vertically */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px; /* Fixed height for uniformity */
+  }
+  
+  .action-button.btn-warning,
+  .action-button.btn-danger {
+    border-radius: 4px; /* Consistent border radius */
+  }

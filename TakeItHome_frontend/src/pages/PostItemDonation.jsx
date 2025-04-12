@@ -24,7 +24,20 @@ function PostItemDonation() {
     }
   };
 
-
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    const token = localStorage.getItem("jwtToken");
+    try {
+      const res = await fetch(`${API_BASE}/delete/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete item");
+      fetchItems();
+    } catch (err) {
+      console.error("❌ Delete error:", err);
+    }
+  };
 
   return (
     <Container className="donation-container">

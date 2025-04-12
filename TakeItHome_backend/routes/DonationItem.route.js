@@ -15,10 +15,10 @@ const {
 // ✅ Get all donation items
 router.get("/all", getDonationItems);
 
-+// ✅ Get only the logged‑in user’s donation items
-+router.get("/user", verifyToken, getDonationItemsByUser);
+// ✅ Get only the logged-in user’s donation items
+router.get("/user", verifyToken, getDonationItemsByUser);
 
-// Create a new donation item with image/video
+// ✅ Create a new donation item with image/video
 router.post(
   "/post",
   verifyToken,
@@ -29,18 +29,24 @@ router.post(
   createDonationItem
 );
 
-// Update donation item
-router.put("/edit/:id", verifyToken, updateDonationItem);
+// ✅ Update a donation item with image/video
+router.put(
+  "/edit/:id",
+  verifyToken,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]),
+  updateDonationItem
+);
 
-// Delete donation item
+// ✅ Delete a donation item
 router.delete("/delete/:id", verifyToken, deleteDonationItem);
 
-// Search or get by ID
+// ✅ Search or get by ID
 router.get("/search", searchDonationItems);
 
--// This was catching “user” as an ID
--// router.get("/:id", getDonationItemById);
-+// ✅ Get donation item by its ID
-+router.get("/:id", getDonationItemById);
+// ✅ Get donation item by its ID
+router.get("/:id", getDonationItemById);
 
 module.exports = router;

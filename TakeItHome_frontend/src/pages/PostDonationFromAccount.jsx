@@ -1,67 +1,124 @@
-import React, { useState } from "react";
-import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
-import "./PostDonationFromAccount.css"; // ✅ Make sure this file exists
+import React, { useState, useEffect } from "react";
+import { Alert, Form, Button, Container, Row, Col } from "react-bootstrap";
+import { useParams, useNavigate } from "react-router-dom";
+import "./PostDonationFromAccount.css";
+
+const API_BASE = "http://localhost:3002/api/donation-items";
 
 const PostDonationFromAccount = () => {
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [condition, setCondition] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [image, setImage] = useState(null);
-  const [video, setVideo] = useState(null);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "",
+    condition: "",
+    description: "",
+    location: "",
+    image: null,
+    video: null,
+  });
   const [message, setMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(!!id);
 
-  const API_BASE = "http://localhost:3002/api/donation-items";
+  useEffect(() => {
+    if (id) {
+      const fetchDonationItem = async () => {
+        try {
+          const token = localStorage.getItem("jwtToken");
+          const res = await fetch(`${API_BASE}/${id}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (!res.ok) throw new Error("Failed to fetch donation item");
+          const data = await res.json();
+          console.log("Fetched donation item:", data);
+          setFormData({
+            title: data.title || "",
+            category: data.category || "",
+            condition: data.condition || "",
+            description: data.description || "",
+            location: data.location || "",
+            image: null,
+            video: null,
+          });
+        } catch (err) {
+          setMessage({ type: "danger", text: err.message || "Failed to load donation item" });
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchDonationItem();
+    } else {
+      setLoading(false);
+    }
+  }, [id]);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    if (!title || !category || !condition || !description || !location || !image) {
-      setMessage({ type: "danger", text: "All fields and image are required." });
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      setMessage({ type: "danger", text: "Please log in to submit" });
+      setIsSubmitting(false);
       return;
     }
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("category", category);
-    formData.append("condition", condition);
-    formData.append("description", description);
-    formData.append("location", location);
-    formData.append("image", image);
-    if (video) formData.append("video", video);
+    const form = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) form.append(key, value);
+    });
 
     try {
-      const res = await fetch(`${API_BASE}/post`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-        },
-        body: formData,
+      const url = id ? `${API_BASE}/edit/${id}` : `${API_BASE}/post`; // Changed to /edit/:id
+      const method = id ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
       });
 
-      if (!res.ok) throw new Error("Failed to post donation item");
+      if (!res.ok) throw new Error(await res.text());
 
-      setMessage({ type: "success", text: "Item posted successfully!" });
-
-      // Reset form
-      setTitle("");
-      setCategory("");
-      setCondition("");
-      setDescription("");
-      setLocation("");
-      setImage(null);
-      setVideo(null);
+      setMessage({
+        type: "success",
+        text: id ? "Donation item updated successfully!" : "Donation item posted successfully!",
+      });
+      if (id) {
+        setTimeout(() => navigate("/my-posts"), 2000);
+      } else {
+        setFormData({
+          title: "",
+          category: "",
+          condition: "",
+          description: "",
+          location: "",
+          image: null,
+          video: null,
+        });
+      }
     } catch (err) {
-      setMessage({ type: "danger", text: err.message });
+      setMessage({ type: "danger", text: err.message || (id ? "Update failed" : "Posting failed") });
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (loading) return <div className="text-center mt-5">Loading...</div>;
 
   return (
     <Container className="post-donation-container mt-5">
       <Row className="justify-content-center">
         <Col md={8}>
-          <h2 className="post-donation-title">Post Donation Item</h2>
+          <h2 className="post-donation-title">{id ? "Edit Donation Item" : "Post Donation Item"}</h2>
 
           {message && <Alert variant={message.type} className="alert-custom">{message.text}</Alert>}
 
@@ -71,8 +128,9 @@ const PostDonationFromAccount = () => {
               <Form.Control
                 className="form-control-glow"
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
                 placeholder="Enter item name"
                 required
               />
@@ -82,8 +140,9 @@ const PostDonationFromAccount = () => {
               <Form.Label className="form-label-glow">Category</Form.Label>
               <Form.Select
                 className="form-select-glow"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
                 required
               >
                 <option value="">Select Category</option>
@@ -99,8 +158,9 @@ const PostDonationFromAccount = () => {
               <Form.Label className="form-label-glow">Condition</Form.Label>
               <Form.Select
                 className="form-select-glow"
-                value={condition}
-                onChange={(e) => setCondition(e.target.value)}
+                name="condition"
+                value={formData.condition}
+                onChange={handleChange}
                 required
               >
                 <option value="">Select Condition</option>
@@ -114,8 +174,9 @@ const PostDonationFromAccount = () => {
               <Form.Control
                 className="form-control-glow"
                 type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
                 required
               />
             </Form.Group>
@@ -125,21 +186,23 @@ const PostDonationFromAccount = () => {
               <Form.Control
                 className="form-control-glow"
                 as="textarea"
+                name="description"
                 rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={handleChange}
                 required
               />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label className="form-label-glow">Image</Form.Label>
+              <Form.Label className="form-label-glow">Image {id ? "(Upload new to replace)" : ""}</Form.Label>
               <Form.Control
                 className="file-input-glow"
                 type="file"
+                name="image"
                 accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                required
+                onChange={handleChange}
+                required={!id}
               />
             </Form.Group>
 
@@ -148,13 +211,14 @@ const PostDonationFromAccount = () => {
               <Form.Control
                 className="file-input-glow"
                 type="file"
+                name="video"
                 accept="video/*"
-                onChange={(e) => setVideo(e.target.files[0])}
+                onChange={handleChange}
               />
             </Form.Group>
 
-            <Button type="submit" className="submit-btn-glow w-100">
-              Post Donation Item
+            <Button type="submit" className="submit-btn-glow w-100" disabled={isSubmitting}>
+              {isSubmitting ? (id ? "Updating..." : "Posting...") : (id ? "Update Donation Item" : "Post Donation Item")}
             </Button>
           </Form>
         </Col>
