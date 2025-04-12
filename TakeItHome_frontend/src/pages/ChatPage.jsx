@@ -109,14 +109,14 @@ const ChatPage = () => {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!message.trim() || !selectedChat) return;
-  
+
     const msgPayload = {
       receiverId: selectedChat.userId,
       itemId: selectedChat.itemId,
       content: message,
       itemType: selectedChat.itemType,
     };
-  
+
     try {
       const response = await fetch(`${API_BASE}/api/chat/send`, {
         method: "POST",
@@ -126,9 +126,9 @@ const ChatPage = () => {
         },
         body: JSON.stringify(msgPayload),
       });
-  
+
       const savedMessage = await response.json();
-  
+
       if (savedMessage && savedMessage._id && savedMessage.createdAt) {
         socket.emit("send_message", savedMessage);
         setChatLog((prev) => [...prev, savedMessage]);
@@ -140,7 +140,7 @@ const ChatPage = () => {
       console.error("❌ Message send failed:", err);
     }
   };
-  
+
   return (
     <Container fluid className="chat-container">
       <Row>
@@ -168,7 +168,15 @@ const ChatPage = () => {
         <Col md={6} className="chat-panel">
           {selectedChat ? (
             <>
-              <h5>Chat with {selectedChat.username}</h5>
+              <h5>
+                Chat with{" "}
+                {(otherUser && (otherUser.name || otherUser.username)) ||
+                  selectedChat?.username ||
+                  "Unknown User"}
+              </h5>
+
+
+
               <div className="chat-history">
                 {chatLog.map((msg, i) => (
                   <div key={i} className={`chat-msg ${msg.senderId === loggedInUserId ? "me" : "them"}`}>

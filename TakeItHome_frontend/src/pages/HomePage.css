@@ -1,0 +1,132 @@
+.home-container {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: auto;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .map-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    z-index: 0;
+    filter: brightness(70%) contrast(1.1);
+  }
+  
+  .overlay-content {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 2rem 6rem;
+    text-align: center;
+    color: white;
+    text-shadow: 1px 1px 5px #000;
+  }
+  
+  .title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .location-text {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .search-section {
+    margin-top: 2rem;
+  }
+  
+  .search-section h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .about-section {
+    margin-top: 3rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .about-section h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .about-section p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  /* Make the search bar smaller */
+.search-section {
+    margin-top: 2rem;
+  }
+  
+  .search-section input[type="text"],
+  .search-section input {
+    width: 300px !important;
+    max-width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .search-section button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .search-section button:hover {
+    background-color: #0056b3;
+  }
+  .search-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* horizontal center */
+    justify-content: center; /* vertical center */
+    margin-top: 2rem;
+    padding: 1rem;
+  }
+  
+  .search-section input[type="text"],
+  .search-section input {
+    width: 300px !important;
+    max-width: 90%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1rem;
+  }
+  
+  .search-section button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .search-section button:hover {
+    background-color: #0056b3;
+  }
+  
